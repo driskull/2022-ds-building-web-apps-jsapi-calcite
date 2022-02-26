@@ -28,7 +28,7 @@ async function init() {
     }
 
     activeItem = true;
-    var attributes = result.attributes;
+    const attributes = result.attributes;
     const panelExists = document.getElementById("detail-panel");
     // a janky way to replace content in a single panel vs appending entire new one each time
     if (!panelExists) {
@@ -213,11 +213,9 @@ async function init() {
     },
   });
 
-  let homeWidget = new Home({
+  view.ui.add(new Home({
     view,
-  });
-
-  view.ui.add(homeWidget, "top-left");
+  }), "top-left");
   view.ui.move("zoom", "top-left");
 
   await view.when();
@@ -244,12 +242,12 @@ async function init() {
       return;
     }
 
-    var graphic = results[0].graphic;
+    const graphic = results[0].graphic;
 
     resultClickHandler(graphic.attributes[collegeLayer.objectIdField]);
   });
 
-  var activeItem = false;
+  let activeItem = false;
 
   if (view.extent && !activeItem) {
     filterItems();
