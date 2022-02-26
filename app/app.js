@@ -110,94 +110,90 @@ async function init() {
   }
 
   async function filterItems() {
-    collegeLayer
-      .queryFeatures({
-        start: 0,
-        num: 10,
-        orderByFields: ["TOT_ENROLL DESC"],
-        where: `TOT_ENROLL > 100`,
-        outFields: [
-          "NAICS_DESC",
-          "STATE",
-          "ADDRESS",
-          "CITY",
-          "NAME",
-          "TOT_ENROLL",
-          "DORM_CAP",
-        ],
-      })
-      .then(function (results) {
-        console.log({ results });
-        document
-          .getElementById("resultBlock")
-          .setAttribute("summary", results.features.length);
-        // todo should filter existing not wholesale zero out and replace...
-        document.getElementById("results").innerHTML = "";
-        // temp only show 100 - rendering like this not functioning well
-        results.features
-          .slice(0, 99)
-          .sort((a, b) =>
-            a.attributes["NAME"].localeCompare(b.attributes["NAME"])
-          )
-          .map((result) => {
-            const attributes = result.attributes;
-            const item = document.createElement("calcite-card");
+    const results = await collegeLayer.queryFeatures({
+      start: 0,
+      num: 10,
+      orderByFields: ["TOT_ENROLL DESC"],
+      where: `TOT_ENROLL > 100`,
+      outFields: [
+        "NAICS_DESC",
+        "STATE",
+        "ADDRESS",
+        "CITY",
+        "NAME",
+        "TOT_ENROLL",
+        "DORM_CAP",
+      ],
+    });
 
-            if (parseInt(attributes["DORM_CAP"]) !== -999) {
-              const chipDorm = document.createElement("calcite-chip");
-              chipDorm.setAttribute("icon", "locator");
-              chipDorm.setAttribute("slot", "footer-trailing");
-              chipDorm.setAttribute("scale", "s");
-              chipDorm.innerText = "Dorm";
-              item.appendChild(chipDorm);
-            }
+    console.log({ results });
+    document
+      .getElementById("resultBlock")
+      .setAttribute("summary", results.features.length);
+    // todo should filter existing not wholesale zero out and replace...
+    document.getElementById("results").innerHTML = "";
+    // temp only show 100 - rendering like this not functioning well
+    results.features
+      .slice(0, 99)
+      .sort((a, b) => a.attributes["NAME"].localeCompare(b.attributes["NAME"]))
+      .map((result) => {
+        const attributes = result.attributes;
+        const item = document.createElement("calcite-card");
 
-            const chipPopulation = document.createElement("calcite-chip");
-            const populationLevel =
-              attributes["TOT_ENROLL"] > 15000
-                ? "Large"
-                : attributes["TOT_ENROLL"] > 5000
-                ? "Medium"
-                : "Small";
-            chipPopulation.setAttribute("icon", "users");
-            chipPopulation.setAttribute("slot", "footer-trailing");
-            chipPopulation.setAttribute("scale", "s");
-            chipPopulation.innerText = populationLevel;
-            item.appendChild(chipPopulation);
+        if (parseInt(attributes["DORM_CAP"]) !== -999) {
+          const chipDorm = document.createElement("calcite-chip");
+          chipDorm.setAttribute("icon", "locator");
+          chipDorm.setAttribute("slot", "footer-trailing");
+          chipDorm.setAttribute("scale", "s");
+          chipDorm.innerText = "Dorm";
+          item.appendChild(chipDorm);
+        }
 
-            const chipState = document.createElement("calcite-chip");
-            chipState.setAttribute("icon", "gps-on");
-            chipState.setAttribute("slot", "footer-leading");
-            chipState.setAttribute("scale", "s");
-            chipState.innerText = attributes["STATE"];
-            item.appendChild(chipState);
+        const chipPopulation = document.createElement("calcite-chip");
+        const populationLevel =
+          attributes["TOT_ENROLL"] > 15000
+            ? "Large"
+            : attributes["TOT_ENROLL"] > 5000
+            ? "Medium"
+            : "Small";
+        chipPopulation.setAttribute("icon", "users");
+        chipPopulation.setAttribute("slot", "footer-trailing");
+        chipPopulation.setAttribute("scale", "s");
+        chipPopulation.innerText = populationLevel;
+        item.appendChild(chipPopulation);
 
-            const title = document.createElement("span");
-            title.setAttribute("slot", "title");
-            title.innerText = handleCasing(attributes["NAME"]);
+        const chipState = document.createElement("calcite-chip");
+        chipState.setAttribute("icon", "gps-on");
+        chipState.setAttribute("slot", "footer-leading");
+        chipState.setAttribute("scale", "s");
+        chipState.innerText = attributes["STATE"];
+        item.appendChild(chipState);
 
-            const avatar = document.createElement("calcite-avatar");
-            avatar.setAttribute("scale", "s");
-            avatar.setAttribute("username", attributes["NAME"].slice(0, 2));
-            title.insertAdjacentElement("afterbegin", avatar);
+        const title = document.createElement("span");
+        title.setAttribute("slot", "title");
+        title.innerText = handleCasing(attributes["NAME"]);
 
-            const summary = document.createElement("span");
-            summary.setAttribute("slot", "subtitle");
-            summary.innerText = handleCasing(attributes["NAICS_DESC"]);
+        const avatar = document.createElement("calcite-avatar");
+        avatar.setAttribute("scale", "s");
+        avatar.setAttribute("username", attributes["NAME"].slice(0, 2));
+        title.insertAdjacentElement("afterbegin", avatar);
 
-            item.appendChild(title);
-            item.appendChild(summary);
+        const summary = document.createElement("span");
+        summary.setAttribute("slot", "subtitle");
+        summary.innerText = handleCasing(attributes["NAICS_DESC"]);
 
-            // add listener to display data on list item click
-            item.addEventListener("click", () =>
-              resultClickHandler(result.attributes[collegeLayer.objectIdField])
-            );
-            item.addEventListener("click", (e) =>
-              e.target.setAttribute("selected", true)
-            );
+        item.appendChild(title);
+        item.appendChild(summary);
 
-            document.getElementById("results").appendChild(item);
-          });
+        // add listener to display data on list item click
+        item.addEventListener("click", () =>
+          resultClickHandler(result.attributes[collegeLayer.objectIdField])
+        );
+        item.addEventListener("click", (e) =>
+          e.target.setAttribute("selected", true)
+        );
+
+        document.getElementById("results").appendChild(item);
       });
   }
 
@@ -235,19 +231,23 @@ async function init() {
   console.log({ collegeLayer });
 
   // handle click on map point
-  view.on("click", (event) =>
-    view.hitTest(event).then((response) => {
-      const results = response.results.filter(result => result.graphic.sourceLayer.id === collegeLayer.id && !result.graphic.isAggregate);
+  view.on("click", async (event) => {
+    const response = await view.hitTest(event);
 
-      if (!results.length) {
-        return;
-      }
+    const results = response.results.filter(
+      (result) =>
+        result.graphic.sourceLayer.id === collegeLayer.id &&
+        !result.graphic.isAggregate
+    );
 
-      var graphic = results[0].graphic;
+    if (!results.length) {
+      return;
+    }
 
-      resultClickHandler(graphic.attributes[collegeLayer.objectIdField]);
-    })
-  );
+    var graphic = results[0].graphic;
+
+    resultClickHandler(graphic.attributes[collegeLayer.objectIdField]);
+  });
 
   var activeItem = false;
 
