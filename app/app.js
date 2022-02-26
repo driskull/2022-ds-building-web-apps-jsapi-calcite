@@ -5,74 +5,99 @@ import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
 async function init() {
   // display requested item data
   // handle flow destroying dom of added panel...
-  function resultClickHandler(result) {
-    if (result.geometry && result.attributes) {
-      activeItem = true;
-      var attributes = result.attributes;
-      const panelExists = document.getElementById("detail-panel");
-      // a janky way to replace content in a single panel vs appending entire new one each time
-      if (!panelExists) {
-        const item = document.createElement("calcite-panel");
-        item.setAttribute("heading", handleCasing(attributes["NAME"]));
-        item.setAttribute(
-          "summary",
-          `${handleCasing(attributes["CITY"])}, ${attributes["STATE"]}`
-        );
-        item.setAttribute("id", "detail-panel");
-        item.addEventListener("calcitePanelBackClick", () => {
-          activeItem = false;
-          filterItems();
-        });
+  async function resultClickHandler(objectId) {
+    const { features } = await collegeLayer.queryFeatures({
+      returnGeometry: true,
+      outSpatialReference: view.spatialReference,
+      objectIds: [objectId],
+      outFields: [
+        "NAICS_DESC",
+        "STATE",
+        "ADDRESS",
+        "CITY",
+        "NAME",
+        "TOT_ENROLL",
+        "DORM_CAP",
+      ],
+    });
 
-        const block = document.createElement("calcite-block");
-        block.setAttribute("open", true);
+    const result = features[0];
 
-        const image = document.createElement("img");
-        image.src = "https://via.placeholder.com/100";
-        image.style.width = "100%";
+    if (!result.geometry || !result.attributes) {
+      return;
+    }
 
-        const popChip = document.createElement("calcite-chip");
-        popChip.setAttribute("id", "detail-chip-pop");
-        popChip.innerText = `population: ${attributes["TOT_ENROLL"]}`;
+    activeItem = true;
+    var attributes = result.attributes;
+    const panelExists = document.getElementById("detail-panel");
+    // a janky way to replace content in a single panel vs appending entire new one each time
+    if (!panelExists) {
+      const item = document.createElement("calcite-panel");
+      item.setAttribute("heading", handleCasing(attributes["NAME"]));
+      item.setAttribute(
+        "summary",
+        `${handleCasing(attributes["CITY"])}, ${attributes["STATE"]}`
+      );
+      item.setAttribute("id", "detail-panel");
+      item.addEventListener("calcitePanelBackClick", () => {
+        activeItem = false;
+        filterItems();
+      });
 
+      const block = document.createElement("calcite-block");
+      block.setAttribute("open", true);
+
+      const image = document.createElement("img");
+      image.src = "https://via.placeholder.com/100";
+      image.style.width = "100%";
+      block.appendChild(image);
+
+      if (attributes["WEBSITE"]) {
         const websiteChip = document.createElement("calcite-chip");
         websiteChip.setAttribute("id", "detail-chip-website");
         websiteChip.innerText = `website: ${attributes["WEBSITE"]}`;
+        block.appendChild(websiteChip);
+      }
 
+      if (attributes["NAICS_DESC"]) {
         const typeChip = document.createElement("calcite-chip");
         typeChip.setAttribute("id", "detail-chip-type");
         typeChip.innerText = `type of college: ${handleCasing(
           attributes["NAICS_DESC"]
         )}`;
-
-        block.appendChild(image);
         block.appendChild(typeChip);
-        block.appendChild(websiteChip);
-        block.appendChild(popChip);
-        item.appendChild(block);
-        document.getElementById("flow").appendChild(item);
-      } else {
-        document
-          .getElementById("detail-panel")
-          .setAttribute("heading", handleCasing(attributes["NAME"]));
-        document.getElementById(
-          "detail-chip-type"
-        ).innerText = `type: ${handleCasing(attributes["NAICS_DESC"])}`;
-        document.getElementById(
-          "detail-chip-website"
-        ).innerText = `website: ${attributes["WEBSITE"]}`;
-        document.getElementById(
-          "detail-chip-pop"
-        ).innerText = `population: ${attributes["POPULATION"]}`;
       }
-      view.goTo(
-        {
-          center: [result.geometry.longitude, result.geometry.latitude],
-          zoom: 10,
-        },
-        { duration: 400 }
-      );
+
+      if (attributes["TOT_ENROLL"]) {
+        const popChip = document.createElement("calcite-chip");
+        popChip.setAttribute("id", "detail-chip-pop");
+        popChip.innerText = `population: ${attributes["TOT_ENROLL"]}`;
+        block.appendChild(popChip);
+      }
+
+      item.appendChild(block);
+      document.getElementById("flow").appendChild(item);
+    } else {
+      document
+        .getElementById("detail-panel")
+        .setAttribute("heading", handleCasing(attributes["NAME"]));
+      document.getElementById(
+        "detail-chip-type"
+      ).innerText = `type: ${handleCasing(attributes["NAICS_DESC"])}`;
+      document.getElementById(
+        "detail-chip-website"
+      ).innerText = `website: ${attributes["WEBSITE"]}`;
+      document.getElementById(
+        "detail-chip-pop"
+      ).innerText = `population: ${attributes["POPULATION"]}`;
     }
+    view.goTo(
+      {
+        center: [result.geometry.longitude, result.geometry.latitude],
+        zoom: 10,
+      },
+      { duration: 400 }
+    );
   }
 
   // uh probably do this elsewhere
@@ -87,8 +112,9 @@ async function init() {
   async function filterItems() {
     collegeLayer
       .queryFeatures({
-        geometry: view.extent,
-        returnGeometry: true,
+        start: 0,
+        num: 10,
+        orderByFields: ["TOT_ENROLL DESC"],
         where: `TOT_ENROLL > 100`,
         outFields: [
           "NAICS_DESC",
@@ -163,7 +189,9 @@ async function init() {
             item.appendChild(summary);
 
             // add listener to display data on list item click
-            item.addEventListener("click", () => resultClickHandler(result));
+            item.addEventListener("click", () =>
+              resultClickHandler(result.attributes[collegeLayer.objectIdField])
+            );
             item.addEventListener("click", (e) =>
               e.target.setAttribute("selected", true)
             );
@@ -207,12 +235,12 @@ async function init() {
   console.log({ collegeLayer });
 
   // handle click on map point
-  view.on("click", (event) =>
-    view.hitTest(event).then((response) => {
-      var graphic = response.results[0].graphic;
-      if (graphic) resultClickHandler(graphic);
-    })
-  );
+  // view.on("click", (event) =>
+  //   view.hitTest(event).then((response) => {
+  //     var graphic = response.results[0].graphic;
+  //     if (graphic) resultClickHandler(graphic);
+  //   })
+  // );
 
   var activeItem = false;
 
