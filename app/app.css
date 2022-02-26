@@ -1,0 +1,44 @@
+#viewDiv {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#primary-panel {
+  --calcite-panel-max-width: 340px;
+  --calcite-panel-min-width: 340px;
+  --calcite-shell-panel-max-width: 340px;
+  --calcite-shell-panel-min-width: 340px;
+}
+
+calcite-card {
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+}
+
+calcite-avatar {
+}
+
+calcite-shell {
+  --calcite-ui-brand: purple;
+  --calcite-ui-brand-hover: rgb(94, 0, 94);
+  --calcite-ui-brand-press: rgb(87, 0, 87);
+}
+
+.temporary-header {
+  padding: 1.25rem 0.75rem;
+  font-size: 20px;
+  font-weight: 500;
+  border-top: 1px solid var(--calcite-ui-border-3);
+  border-left: 1px solid var(--calcite-ui-border-3);
+  border-right: 1px solid var(--calcite-ui-border-3);
+  display: flex;
+  align-items: center;
+  color: purple;
+}
+
+.temporary-header calcite-icon {
+  --calcite-ui-icon-color: purple;
+  margin-inline-end: 1rem;
+}

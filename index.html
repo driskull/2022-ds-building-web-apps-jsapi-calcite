@@ -1,0 +1,81 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>UniversityFinder</title>
+
+  <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.77/calcite.css" />
+  <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.77/calcite.esm.js"></script>
+
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.22/@arcgis/core/assets/esri/themes/light/main.css">
+
+  <link rel="stylesheet" href="app/app.css" />
+  <script type="module" src="app/app.js"></script>
+
+  <!-- todo theme-->
+
+</head>
+
+<body>
+  <calcite-shell class="calcite-presentation" content-behind>
+    <div class="temporary-header" slot="header">
+      <calcite-icon icon="education" scale="l"></calcite-icon>
+      UniversityFinder
+    </div>
+    <!-- the width-scale="" is a hack to let us set a static width - not sure if intended ...-->
+    <calcite-shell-panel slot="primary-panel" width-scale="" id="primary-panel">
+      <calcite-flow id="flow">
+        <calcite-panel heading="Visible results" summary="My degrees will keep me warm" id="resultBlock">
+          <calcite-block open>
+            <calcite-list id="results"></calcite-list>
+          </calcite-block>
+        </calcite-panel>
+      </calcite-flow>
+    </calcite-shell-panel>
+    <calcite-shell-center-row height-scale="l">
+      <div id="viewDiv"></div>
+    </calcite-shell-center-row>
+    <calcite-shell-panel slot="contextual-panel" detached>
+      <calcite-panel heading="Filters">
+        <!-- todo conditionally disable this / show indicator after interaction if options are not initial-->
+        <calcite-action icon="reset" disabled slot="header-actions-end" id="actionResetFilters">
+        </calcite-action>
+        <calcite-tooltip reference-element="actionResetFilters" position="bottom">
+          Reset filters
+        </calcite-tooltip>
+        <calcite-block heading="Basics" open>
+          <calcite-label>
+            School type
+            <calcite-combobox id="schoolTypeSelect">
+              <!-- todo gather options -->
+              <calcite-combobox-item value="type1" text-label="type1">
+              </calcite-combobox-item>
+              <calcite-combobox-item value="type2" text-label="type2">
+              </calcite-combobox-item>
+            </calcite-combobox>
+          </calcite-label>
+          <calcite-label>
+            Attendance range
+            <calcite-slider range min="100" max="50000" min-value="10000" max-value="40000">
+            </calcite-slider>
+          </calcite-label>
+        </calcite-block>
+        <calcite-block heading="Housing" open>
+          <calcite-block-section text="Offers on campus housing" toggle-display="switch">
+            <calcite-label>
+              Dormitory size
+              <calcite-slider range min="100" max="50000" min-value="10000" max-value="40000">
+              </calcite-slider>
+            </calcite-label>
+          </calcite-block-section>
+        </calcite-block>
+        <calcite-button slot="footer-actions" width="full">Submit if no live update
+        </calcite-button>
+      </calcite-panel>
+    </calcite-shell-panel>
+  </calcite-shell>
+</body>
+
+</html>
