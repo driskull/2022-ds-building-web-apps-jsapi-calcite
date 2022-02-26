@@ -235,12 +235,19 @@ async function init() {
   console.log({ collegeLayer });
 
   // handle click on map point
-  // view.on("click", (event) =>
-  //   view.hitTest(event).then((response) => {
-  //     var graphic = response.results[0].graphic;
-  //     if (graphic) resultClickHandler(graphic);
-  //   })
-  // );
+  view.on("click", (event) =>
+    view.hitTest(event).then((response) => {
+      const results = response.results.filter(result => result.graphic.sourceLayer.id === collegeLayer.id && !result.graphic.isAggregate);
+
+      if (!results.length) {
+        return;
+      }
+
+      var graphic = results[0].graphic;
+
+      resultClickHandler(graphic.attributes[collegeLayer.objectIdField]);
+    })
+  );
 
   var activeItem = false;
 
