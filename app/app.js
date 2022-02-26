@@ -1,6 +1,8 @@
 import WebMap from "https://js.arcgis.com/4.22/@arcgis/core/WebMap.js";
 import MapView from "https://js.arcgis.com/4.22/@arcgis/core/views/MapView.js";
 import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
+import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
+import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 
 async function init() {
   // display requested item data
@@ -113,7 +115,7 @@ async function init() {
     const results = await collegeLayer.queryFeatures({
       start: 0,
       num: 10,
-      orderByFields: ["TOT_ENROLL DESC"],
+      geometry: view.extent.clone(),
       where: `TOT_ENROLL > 100`,
       outFields: [
         "NAICS_DESC",
@@ -127,9 +129,10 @@ async function init() {
     });
 
     console.log({ results });
+    // todo: setup pagination
     document
       .getElementById("resultBlock")
-      .setAttribute("summary", results.features.length);
+      .setAttribute("summary", `${results.features.length} results near blah`);
     // todo should filter existing not wholesale zero out and replace...
     document.getElementById("results").innerHTML = "";
     // temp only show 100 - rendering like this not functioning well
@@ -213,10 +216,25 @@ async function init() {
     },
   });
 
-  view.ui.add(new Home({
-    view,
-  }), "top-left");
+  view.ui.add(
+    new Home({
+      view,
+    }),
+    "top-left"
+  );
+
   view.ui.move("zoom", "top-left");
+
+  const search = new Search({
+    view,
+  });
+
+  const searchExpand = new Expand({
+    view,
+    content: search,
+  });
+
+  view.ui.add(searchExpand, "top-left");
 
   await view.when();
 
@@ -249,9 +267,9 @@ async function init() {
 
   let activeItem = false;
 
-  if (view.extent && !activeItem) {
-    filterItems();
-  }
+  view.watch("center", () => !activeItem && filterItems());
+
+  filterItems();
 }
 
 init();
