@@ -94,7 +94,7 @@ async function init() {
     view.goTo(
       {
         center: [result.geometry.longitude, result.geometry.latitude],
-        zoom: 10,
+        zoom: 13,
       },
       { duration: 400 }
     );
