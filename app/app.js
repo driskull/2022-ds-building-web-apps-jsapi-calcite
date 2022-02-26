@@ -113,7 +113,7 @@ async function init() {
           .sort((a, b) =>
             a.attributes["NAME"].localeCompare(b.attributes["NAME"])
           )
-          .map((result, index) => {
+          .map((result) => {
             const attributes = result.attributes;
             const item = document.createElement("calcite-card");
 
