@@ -179,14 +179,18 @@ async function init() {
 
     await collegeLayer.load();
 
+    const where = whereClause();
+
     if (start === 0) {
       count = await collegeLayer.queryFeatureCount({
         geometry: view.extent.clone(),
-        where: whereClause(),
+        where
       });
       paginationNode.total = count;
       paginationNode.start = 1;
     }
+
+    collegeLayer.definitionExpression = where;
 
     paginationNode.hidden = count <= pageNum;
 
