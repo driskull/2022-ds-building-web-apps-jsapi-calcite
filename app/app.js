@@ -8,6 +8,7 @@ async function init() {
   // display requested item data
   // handle flow destroying dom of added panel...
   async function resultClickHandler(objectId) {
+    savedExtent = view.extent.clone();
     const { features } = await collegeLayer.queryFeatures({
       returnGeometry: true,
       outSpatialReference: view.spatialReference,
@@ -18,6 +19,7 @@ async function init() {
         "ADDRESS",
         "CITY",
         "NAME",
+        "WEBSITE",
         "TOT_ENROLL",
         "DORM_CAP",
       ],
@@ -43,6 +45,8 @@ async function init() {
       item.setAttribute("id", "detail-panel");
       item.addEventListener("calcitePanelBackClick", () => {
         activeItem = false;
+        view.extent = savedExtent;
+        savedExtent = null;
         filterItems();
       });
 
@@ -111,14 +115,40 @@ async function init() {
       .join(" ");
   }
 
+  function combineSQLStatements(where, sql) {
+    return where ? ` AND (${sql})` : `(${sql})`;
+  }
+
+  function whereClause() {
+    let where = "TOT_ENROLL > 100";
+
+    if(attendance){
+      where += combineSQLStatements(where, `TOT_ENROLL > ${attendance.min}`);
+      where += combineSQLStatements(where, `TOT_ENROLL < ${attendance.max}`);
+    }
+
+    if(housing?.enabled){
+      where += combineSQLStatements(where, `HOUSING=1`);
+      where += combineSQLStatements(where, `DORM_CAP > ${housing.min}`);
+      where += combineSQLStatements(where, `DORM_CAP < ${housing.max}`);
+    }
+
+    return where;
+  }
+
+  function setQuerying(value){
+    resultBlock.loading = value;
+  }
+
   async function filterItems() {
+    setQuerying(true);
     await collegeLayer.load();
 
     const results = await collegeLayer.queryFeatures({
       start: 0,
       num: 10,
       geometry: view.extent.clone(),
-      where: `TOT_ENROLL > 100`,
+      where: whereClause(),
       outFields: [
         "NAICS_DESC",
         "STATE",
@@ -126,16 +156,21 @@ async function init() {
         "CITY",
         "NAME",
         "TOT_ENROLL",
+        "WEBSITE",
         "DORM_CAP",
-        collegeLayer.objectIdField
+        collegeLayer.objectIdField,
       ],
     });
 
     console.log({ results });
+
+    setQuerying(false);
+
     // todo: setup pagination
-    document
-      .getElementById("resultBlock")
-      .setAttribute("summary", `${results.features.length} results near blah`);
+    resultBlock.setAttribute(
+        "summary",
+        `Displaying ${results.features.length} universities within the map.`
+      );
     // todo should filter existing not wholesale zero out and replace...
     document.getElementById("results").innerHTML = "";
     // temp only show 100 - rendering like this not functioning well
@@ -259,6 +294,8 @@ async function init() {
         !result.graphic.isAggregate
     );
 
+    console.log(results);
+
     if (!results.length) {
       return;
     }
@@ -268,7 +305,41 @@ async function init() {
     resultClickHandler(graphic.attributes[collegeLayer.objectIdField]);
   });
 
+  const attendance = {min: 0, max: 160000};
+  const attendanceNode = document.getElementById("attendance");
+  attendanceNode.min = attendance.min;
+  attendanceNode.max = attendance.max;
+  attendanceNode.minValue = attendance.min;
+  attendanceNode.maxValue = attendance.max;
+  attendanceNode.addEventListener("calciteSliderChange", (event) => {
+    attendance.min = event.target.minValue;
+    attendance.max = event.target.maxValue;
+    filterItems();
+  });
+
+  const housing = {enabled: false, min: 0, max: 20000};
+  const housingSectionNode = document.getElementById("housing-section");
+  housingSectionNode.open = housing.enabled;
+  housingSectionNode.addEventListener("calciteBlockSectionToggle", (event) => {
+    housing.enabled = event.target.open;
+    filterItems();
+  });
+  const housingNode = document.getElementById("housing");
+  housingNode.min = housing.min;
+  housingNode.max = housing.max;
+  housingNode.minValue = housing.min;
+  housingNode.maxValue = housing.max;
+  housingNode.addEventListener("calciteSliderChange", (event) => {
+    housing.min = event.target.minValue;
+    housing.max = event.target.maxValue;
+    filterItems();
+  });
+
+  const resultBlock = document
+  .getElementById("resultBlock");
+
   let activeItem = false;
+  let savedExtent = null;
 
   view.watch("center", () => !activeItem && filterItems());
 
