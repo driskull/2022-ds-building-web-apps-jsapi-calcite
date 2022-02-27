@@ -12,12 +12,13 @@
   --calcite-shell-panel-min-width: 340px;
 }
 
+calcite-slider {
+  max-width: 90%;
+}
+
 calcite-card {
   margin-bottom: 0.75rem;
   cursor: pointer;
-}
-
-calcite-avatar {
 }
 
 calcite-shell {
