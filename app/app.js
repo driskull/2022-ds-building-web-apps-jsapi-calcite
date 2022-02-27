@@ -35,6 +35,7 @@ async function init() {
     }
 
     activeItem = true;
+    filtersNode.disabled = true;
     const attributes = result.attributes;
     const panelExists = document.getElementById("detail-panel");
     // a janky way to replace content in a single panel vs appending entire new one each time
@@ -50,6 +51,7 @@ async function init() {
         await view.goTo(savedExtent);
         savedExtent = null;
         activeItem = false;
+        filtersNode.disabled = false;
         queryItems(savedStart);
       });
 
@@ -363,6 +365,8 @@ async function init() {
   paginationNode.addEventListener("calcitePaginationChange", (event) => {
     queryItems(event.detail.start - 1);
   });
+
+  const filtersNode = document.getElementById("filters");
 
   view.watch("center", () => !activeItem && queryItems());
 
