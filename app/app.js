@@ -6,6 +6,26 @@ import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 
 const pageNum = 10;
 
+const schoolTypes = {
+  611110: "Elementary and Secondary Schools",
+  611210: "Junior Colleges",
+  611310: "Colleges",
+  611410: "Business and Secretarial Schools",
+  611420: "Computer Training",
+  611430: "Professional and Management Development Training",
+  611511: "Cosmetology and Barber Schools",
+  611512: "Flight Training",
+  611513: "Apprenticeship Training",
+  611519: "Other Technical and Trade Schools",
+  611610: "Fine Arts Schools",
+  611620: "Sports and Recreation Instruction",
+  611630: "Language Schools",
+  611691: "Exam Preparation and Tutoring",
+  611692: "Automobile Driving Schools",
+  611699: "All Other Miscellaneous Schools and Instruction",
+  611710: "Educational Support Services",
+};
+
 async function init() {
   // display requested item data
   // handle flow destroying dom of added panel...
@@ -136,6 +156,11 @@ async function init() {
       where += combineSQLStatements(where, `HOUSING=1`);
       where += combineSQLStatements(where, `DORM_CAP > ${housing.min}`);
       where += combineSQLStatements(where, `DORM_CAP < ${housing.max}`);
+    }
+
+    const schoolTypeValue = schoolTypeNode.value;
+    if (schoolTypeValue && schoolTypeValue !== "all") {
+      where += combineSQLStatements(where, `NAICS_CODE = ${schoolTypeValue}`);
     }
 
     return where;
@@ -353,6 +378,17 @@ async function init() {
   housingNode.addEventListener("calciteSliderChange", (event) => {
     housing.min = event.target.minValue;
     housing.max = event.target.maxValue;
+    queryItems();
+  });
+
+  const schoolTypeNode = document.getElementById("schoolType");
+  for (const [key, value] of Object.entries(schoolTypes)) {
+    const option = document.createElement("calcite-option");
+    option.value = key;
+    option.innerText = value;
+    schoolTypeNode.appendChild(option);
+  }
+  schoolTypeNode.addEventListener("calciteSelectChange", () => {
     queryItems();
   });
 
