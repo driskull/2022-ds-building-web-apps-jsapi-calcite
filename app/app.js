@@ -170,7 +170,26 @@ async function init() {
     resultBlock.loading = value;
   }
 
+  function resetFilters() {
+    schoolTypeNode.value = "all";
+    attendance.min = 0;
+    attendance.max = 160000;
+    attendanceNode.minValue = attendance.min;
+    attendanceNode.maxValue = attendance.max;
+    housing.enabled = false;
+    housing.min = 0;
+    housing.max = 20000;
+    housingSectionNode.open = housing.enabled;
+    housingNode.minValue = housing.min;
+    housingNode.maxValue = housing.max;
+    hasFilterChanges = false;
+    queryItems();
+  }
+
   async function queryItems(start = 0) {
+    resetNode.hidden = !hasFilterChanges;
+    resetNode.indicator = hasFilterChanges;
+
     if (!collegeLayer) {
       return;
     }
@@ -184,7 +203,7 @@ async function init() {
     if (start === 0) {
       count = await collegeLayer.queryFeatureCount({
         geometry: view.extent.clone(),
-        where
+        where,
       });
       paginationNode.total = count;
       paginationNode.start = 1;
@@ -364,6 +383,7 @@ async function init() {
   attendanceNode.addEventListener("calciteSliderChange", (event) => {
     attendance.min = event.target.minValue;
     attendance.max = event.target.maxValue;
+    hasFilterChanges = true;
     queryItems();
   });
 
@@ -372,6 +392,7 @@ async function init() {
   housingSectionNode.open = housing.enabled;
   housingSectionNode.addEventListener("calciteBlockSectionToggle", (event) => {
     housing.enabled = event.target.open;
+    hasFilterChanges = true;
     queryItems();
   });
   const housingNode = document.getElementById("housing");
@@ -382,6 +403,7 @@ async function init() {
   housingNode.addEventListener("calciteSliderChange", (event) => {
     housing.min = event.target.minValue;
     housing.max = event.target.maxValue;
+    hasFilterChanges = true;
     queryItems();
   });
 
@@ -393,6 +415,7 @@ async function init() {
     schoolTypeNode.appendChild(option);
   }
   schoolTypeNode.addEventListener("calciteSelectChange", () => {
+    hasFilterChanges = true;
     queryItems();
   });
 
@@ -402,6 +425,7 @@ async function init() {
   let activeItem = false;
   let savedExtent = null;
   let savedStart = 0;
+  let hasFilterChanges = false;
 
   const paginationNode = document.getElementById("pagination");
   paginationNode.num = pageNum;
@@ -411,6 +435,9 @@ async function init() {
   });
 
   const filtersNode = document.getElementById("filters");
+
+  const resetNode = document.getElementById("reset");
+  resetNode.addEventListener("click", () => resetFilters());
 
   view.watch("center", () => !activeItem && queryItems());
 
