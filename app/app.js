@@ -112,6 +112,8 @@ async function init() {
   }
 
   async function filterItems() {
+    await collegeLayer.load();
+
     const results = await collegeLayer.queryFeatures({
       start: 0,
       num: 10,
@@ -125,6 +127,7 @@ async function init() {
         "NAME",
         "TOT_ENROLL",
         "DORM_CAP",
+        collegeLayer.objectIdField
       ],
     });
 
