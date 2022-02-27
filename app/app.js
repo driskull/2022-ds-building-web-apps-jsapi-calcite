@@ -47,7 +47,7 @@ async function init() {
         activeItem = false;
         view.extent = savedExtent;
         savedExtent = null;
-        filterItems();
+        queryItems();
       });
 
       const block = document.createElement("calcite-block");
@@ -122,12 +122,12 @@ async function init() {
   function whereClause() {
     let where = "TOT_ENROLL > 100";
 
-    if(attendance){
+    if (attendance) {
       where += combineSQLStatements(where, `TOT_ENROLL > ${attendance.min}`);
       where += combineSQLStatements(where, `TOT_ENROLL < ${attendance.max}`);
     }
 
-    if(housing?.enabled){
+    if (housing?.enabled) {
       where += combineSQLStatements(where, `HOUSING=1`);
       where += combineSQLStatements(where, `DORM_CAP > ${housing.min}`);
       where += combineSQLStatements(where, `DORM_CAP < ${housing.max}`);
@@ -136,16 +136,26 @@ async function init() {
     return where;
   }
 
-  function setQuerying(value){
+  function setQuerying(value) {
     resultBlock.loading = value;
   }
 
-  async function filterItems() {
+  async function queryItems(start = 0) {
     setQuerying(true);
     await collegeLayer.load();
 
+    if (start === 0) {
+      const count = await collegeLayer.queryFeatureCount({
+        geometry: view.extent.clone(),
+        where: whereClause(),
+      });
+      paginationNode.total = count;
+    } else {
+      paginationNode.start = 1;
+    }
+
     const results = await collegeLayer.queryFeatures({
-      start: 0,
+      start,
       num: 10,
       geometry: view.extent.clone(),
       where: whereClause(),
@@ -168,9 +178,9 @@ async function init() {
 
     // todo: setup pagination
     resultBlock.setAttribute(
-        "summary",
-        `Displaying ${results.features.length} universities within the map.`
-      );
+      "summary",
+      `Displaying ${results.features.length} universities within the map.`
+    );
     // todo should filter existing not wholesale zero out and replace...
     document.getElementById("results").innerHTML = "";
     // temp only show 100 - rendering like this not functioning well
@@ -305,7 +315,7 @@ async function init() {
     resultClickHandler(graphic.attributes[collegeLayer.objectIdField]);
   });
 
-  const attendance = {min: 0, max: 160000};
+  const attendance = { min: 0, max: 160000 };
   const attendanceNode = document.getElementById("attendance");
   attendanceNode.min = attendance.min;
   attendanceNode.max = attendance.max;
@@ -314,15 +324,15 @@ async function init() {
   attendanceNode.addEventListener("calciteSliderChange", (event) => {
     attendance.min = event.target.minValue;
     attendance.max = event.target.maxValue;
-    filterItems();
+    queryItems();
   });
 
-  const housing = {enabled: false, min: 0, max: 20000};
+  const housing = { enabled: false, min: 0, max: 20000 };
   const housingSectionNode = document.getElementById("housing-section");
   housingSectionNode.open = housing.enabled;
   housingSectionNode.addEventListener("calciteBlockSectionToggle", (event) => {
     housing.enabled = event.target.open;
-    filterItems();
+    queryItems();
   });
   const housingNode = document.getElementById("housing");
   housingNode.min = housing.min;
@@ -332,18 +342,24 @@ async function init() {
   housingNode.addEventListener("calciteSliderChange", (event) => {
     housing.min = event.target.minValue;
     housing.max = event.target.maxValue;
-    filterItems();
+    queryItems();
   });
 
-  const resultBlock = document
-  .getElementById("resultBlock");
+  const resultBlock = document.getElementById("resultBlock");
 
   let activeItem = false;
   let savedExtent = null;
 
-  view.watch("center", () => !activeItem && filterItems());
+  const paginationNode = document.getElementById("pagination");
+  paginationNode.num = 10;
+  paginationNode.start = 1;
+  paginationNode.addEventListener("calcitePaginationChange", (event) => {
+    queryItems(event.detail.start - 1);
+  });
 
-  filterItems();
+  view.watch("center", () => !activeItem && queryItems());
+
+  queryItems();
 }
 
 init();
