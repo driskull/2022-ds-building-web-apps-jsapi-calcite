@@ -4,11 +4,14 @@ import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 
+const pageNum = 10;
+
 async function init() {
   // display requested item data
   // handle flow destroying dom of added panel...
   async function resultClickHandler(objectId) {
     savedExtent = view.extent.clone();
+    savedStart = paginationNode.start - 1;
     const { features } = await collegeLayer.queryFeatures({
       returnGeometry: true,
       outSpatialReference: view.spatialReference,
@@ -43,11 +46,11 @@ async function init() {
         `${handleCasing(attributes["CITY"])}, ${attributes["STATE"]}`
       );
       item.setAttribute("id", "detail-panel");
-      item.addEventListener("calcitePanelBackClick", () => {
-        activeItem = false;
-        view.extent = savedExtent;
+      item.addEventListener("calcitePanelBackClick", async () => {
+        await view.goTo(savedExtent);
         savedExtent = null;
-        queryItems();
+        activeItem = false;
+        queryItems(savedStart);
       });
 
       const block = document.createElement("calcite-block");
@@ -142,21 +145,23 @@ async function init() {
 
   async function queryItems(start = 0) {
     setQuerying(true);
+
     await collegeLayer.load();
 
     if (start === 0) {
-      const count = await collegeLayer.queryFeatureCount({
+      count = await collegeLayer.queryFeatureCount({
         geometry: view.extent.clone(),
         where: whereClause(),
       });
       paginationNode.total = count;
-    } else {
       paginationNode.start = 1;
     }
 
+    paginationNode.hidden = count <= pageNum;
+
     const results = await collegeLayer.queryFeatures({
       start,
-      num: 10,
+      num: pageNum,
       geometry: view.extent.clone(),
       where: whereClause(),
       outFields: [
@@ -179,7 +184,7 @@ async function init() {
     // todo: setup pagination
     resultBlock.setAttribute(
       "summary",
-      `Displaying ${results.features.length} universities within the map.`
+      `${count} universities found within the map.`
     );
     // todo should filter existing not wholesale zero out and replace...
     document.getElementById("results").innerHTML = "";
@@ -347,11 +352,13 @@ async function init() {
 
   const resultBlock = document.getElementById("resultBlock");
 
+  let count = 0;
   let activeItem = false;
   let savedExtent = null;
+  let savedStart = 0;
 
   const paginationNode = document.getElementById("pagination");
-  paginationNode.num = 10;
+  paginationNode.num = pageNum;
   paginationNode.start = 1;
   paginationNode.addEventListener("calcitePaginationChange", (event) => {
     queryItems(event.detail.start - 1);
