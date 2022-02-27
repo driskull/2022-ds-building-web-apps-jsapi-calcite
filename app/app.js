@@ -146,6 +146,10 @@ async function init() {
   }
 
   async function queryItems(start = 0) {
+    if (!collegeLayer) {
+      return;
+    }
+
     setQuerying(true);
 
     await collegeLayer.load();
@@ -296,7 +300,7 @@ async function init() {
   const collegeLayer = view.map.layers.find(
     (layer) =>
       layer.url ===
-      "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_Colleges_and_Universities_view/FeatureServer"
+      "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_Colleges_and_Universities/FeatureServer"
   );
 
   console.log({ collegeLayer });
