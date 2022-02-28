@@ -4,8 +4,8 @@ import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 
-import { appConfig } from "./config";
-import { appState } from "./state";
+import { appConfig } from "./config.js";
+import { appState } from "./state.js";
 
 async function init() {
   // query for elements
