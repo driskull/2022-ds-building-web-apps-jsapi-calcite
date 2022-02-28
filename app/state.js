@@ -5,4 +5,5 @@ export const appState = {
   hasFilterChanges: false,
   attendance: { min: 0, max: 160000 },
   housing: { enabled: false, min: 0, max: 20000 },
-}
+  activeProgramTypes: [],
+};

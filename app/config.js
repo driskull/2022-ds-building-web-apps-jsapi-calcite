@@ -6,6 +6,14 @@ export const appConfig = {
     "Junior Colleges": [611210],
     "Other Trade Schools": [611410, 611511, 611519, 611610],
   },
+  programTypes: {
+    Associates: [3],
+    Bachelors: [5],
+    Masters: [7],
+    Doctorate: [9],
+    "Post-graduate certificate": [6, 8],
+    "In-betweenies": [1, 2, 4],
+  },
   pageNum: 25,
   collegeLayerUrl:
     "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_Colleges_and_Universities/FeatureServer",
@@ -18,6 +26,7 @@ export const appConfig = {
     "WEBSITE",
     "TOT_ENROLL",
     "DORM_CAP",
+    "HI_OFFER",
   ],
   attendance: { min: 0, max: 160000 },
   housing: { enabled: false, min: 0, max: 20000 },

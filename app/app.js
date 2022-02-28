@@ -14,6 +14,7 @@ async function init() {
   const attendanceNode = document.getElementById("attendance");
   const housingSectionNode = document.getElementById("housingSection");
   const housingNode = document.getElementById("housing");
+  const programTypeNode = document.getElementById("programType");
   const schoolTypeNode = document.getElementById("schoolType");
   const resultBlockNode = document.getElementById("resultBlock");
   const paginationNode = document.getElementById("pagination");
@@ -45,13 +46,13 @@ async function init() {
     const detailPanelNode = document.getElementById("detail-panel");
     // a janky way to replace content in a single panel vs appending entire new one each time
     if (!detailPanelNode) {
-      const item = document.createElement("calcite-panel");
-      item.heading = handleCasing(attributes["NAME"]);
-      item.summary = `${handleCasing(attributes["CITY"])}, ${
+      const panel = document.createElement("calcite-panel");
+      panel.heading = handleCasing(attributes["NAME"]);
+      panel.summary = `${handleCasing(attributes["CITY"])}, ${
         attributes["STATE"]
       }`;
-      item.id = "detail-panel";
-      item.addEventListener("calcitePanelBackClick", async () => {
+      panel.id = "detail-panel";
+      panel.addEventListener("calcitePanelBackClick", async () => {
         if (appState.savedExtent) {
           await view.goTo(appState.savedExtent);
           appState.savedExtent = null;
@@ -69,10 +70,17 @@ async function init() {
       block.appendChild(image);
 
       if (attributes["WEBSITE"]) {
-        const websiteChip = document.createElement("calcite-chip");
-        websiteChip.id = "detail-chip-website";
-        websiteChip.innerText = `website: ${attributes["WEBSITE"]}`;
-        block.appendChild(websiteChip);
+        const itemWebsite = document.createElement("calcite-button");
+        itemWebsite.id = "detail-item-website";
+        itemWebsite.iconEnd = "launch";
+        itemWebsite.slot = "footer-actions";
+        itemWebsite.scale = "l";
+        itemWebsite.width = "full";
+        itemWebsite.innerText = `Learn more`;
+        itemWebsite.href = `http://${attributes["WEBSITE"]}`;
+        itemWebsite.rel = `noref noreferrer`;
+        itemWebsite.target = `blank`;
+        panel.appendChild(itemWebsite);
       }
 
       if (attributes["NAICS_DESC"]) {
@@ -91,16 +99,18 @@ async function init() {
         block.appendChild(popChip);
       }
 
-      item.appendChild(block);
-      flowNode.appendChild(item);
+      panel.appendChild(block);
+      flowNode.appendChild(panel);
     } else {
       detailPanelNode.heading = handleCasing(attributes["NAME"]);
       document.getElementById(
         "detail-chip-type"
       ).innerText = `type: ${handleCasing(attributes["NAICS_DESC"])}`;
+      document.getElementById("detail-item-website").innerText = `Learn more`;
       document.getElementById(
-        "detail-chip-website"
-      ).innerText = `website: ${attributes["WEBSITE"]}`;
+        "detail-item-website"
+      ).href = `http://${attributes["WEBSITE"]}`;
+
       document.getElementById(
         "detail-chip-pop"
       ).innerText = `population: ${attributes["POPULATION"]}`;
@@ -153,6 +163,20 @@ async function init() {
       );
     }
 
+    if (appState.activeProgramTypes.length > 0) {
+      let schoolWhere = "";
+      const values = appState.activeProgramTypes.flat();
+      values.forEach(
+        (value) =>
+          (schoolWhere += combineSQLStatements(
+            schoolWhere,
+            `HI_OFFER = ${value}`,
+            "OR"
+          ))
+      );
+      where += combineSQLStatements(where, schoolWhere);
+    }
+
     const schoolTypeValue = schoolTypeNode.value;
     if (schoolTypeValue && schoolTypeValue !== appConfig.defaultSchoolType) {
       const values = schoolTypeValue.split(",");
@@ -180,6 +204,10 @@ async function init() {
     housingSectionNode.open = appConfig.housing.enabled;
     housingNode.minValue = appConfig.housing.min;
     housingNode.maxValue = appConfig.housing.max;
+    appState.activeProgramTypes = [];
+    [...document.querySelectorAll(`[data-type*="type"]`)].forEach(
+      (item) => (item.color = "grey")
+    );
     appState.hasFilterChanges = false;
     queryItems();
   }
@@ -244,26 +272,11 @@ async function init() {
         chipDorm.icon = "locator";
         chipDorm.slot = "footer-trailing";
         chipDorm.scale = "s";
-        chipDorm.innerText = "Dorm";
+        chipDorm.innerText = "Housing";
         item.appendChild(chipDorm);
       }
 
-      const chipPopulation = document.createElement("calcite-chip");
-      const populationLevel =
-        attributes["TOT_ENROLL"] > 15000
-          ? "Large"
-          : attributes["TOT_ENROLL"] > 5000
-          ? "Medium"
-          : "Small";
-      chipPopulation.icon = "users";
-      chipPopulation.slot = "footer-trailing";
-      chipPopulation.scale = "s";
-
-      chipPopulation.innerText = populationLevel;
-      item.appendChild(chipPopulation);
-
       const chipState = document.createElement("calcite-chip");
-      chipState.icon = "gps-on";
       chipState.slot = "footer-leading";
       chipState.scale = "s";
       chipState.innerText = attributes["STATE"];
@@ -272,11 +285,6 @@ async function init() {
       const title = document.createElement("span");
       title.slot = "title";
       title.innerText = handleCasing(attributes["NAME"]);
-
-      const avatar = document.createElement("calcite-avatar");
-      avatar.scale = "s";
-      avatar.username = attributes["NAME"].slice(0, 2);
-      title.insertAdjacentElement("afterbegin", avatar);
 
       const summary = document.createElement("span");
       summary.slot = "subtitle";
@@ -302,9 +310,6 @@ async function init() {
   const view = new MapView({
     container: "viewDiv",
     map,
-    padding: {
-      left: 340,
-    },
   });
 
   view.ui.add(
@@ -405,6 +410,33 @@ async function init() {
     appState.hasFilterChanges = true;
     queryItems();
   });
+
+  // Degree type chip select
+  for (const [key, value] of Object.entries(appConfig.programTypes)) {
+    const chip = document.createElement("calcite-chip");
+    chip.tabIndex = 0;
+    chip.dataset.type = "type";
+    chip.value = value;
+    chip.innerText = key;
+    chip.addEventListener("click", (event) =>
+      handleMultipleChipSelection(event, value)
+    );
+    programTypeNode.appendChild(chip);
+  }
+
+  function handleMultipleChipSelection(event, value) {
+    let items = appState.activeProgramTypes;
+    if (!items.includes(value)) {
+      items.push(value);
+      event.target.color = "blue";
+    } else {
+      items = items.filter((item) => item !== value);
+      event.target.color = "grey";
+    }
+    appState.activeProgramTypes = items;
+    appState.hasFilterChanges = true;
+    queryItems();
+  }
 
   // Pagination
   paginationNode.num = appConfig.pageNum;
