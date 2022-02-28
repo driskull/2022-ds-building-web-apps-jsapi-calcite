@@ -5,13 +5,13 @@ import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 
 import { config } from "./config";
-
 import { appState } from "./state";
 
 async function init() {
+  // query for elements
   const resultsNode = document.getElementById("results");
   const attendanceNode = document.getElementById("attendance");
-  const housingSectionNode = document.getElementById("housing-section");
+  const housingSectionNode = document.getElementById("housingSection");
   const housingNode = document.getElementById("housing");
   const schoolTypeNode = document.getElementById("schoolType");
   const resultBlockNode = document.getElementById("resultBlock");
@@ -166,13 +166,10 @@ async function init() {
 
   function resetFilters() {
     schoolTypeNode.value = "all";
-    appState.attendance.min = config.attendance.min;
-    appState.attendance.max = config.attendance.min;
+    appState.attendance = config.attendance;
     attendanceNode.minValue = config.attendance.min;
     attendanceNode.maxValue = config.attendance.max;
-    appState.housing.enabled = config.housing.enabled;
-    appState.housing.min = config.housing.min;
-    appState.housing.max = config.housing.max;
+    appState.housing = config.housing;
     housingSectionNode.open = config.housing.enabled;
     housingNode.minValue = config.housing.min;
     housingNode.maxValue = config.housing.max;
