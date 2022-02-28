@@ -70,7 +70,7 @@ async function init() {
 
       if (attributes["WEBSITE"]) {
         const itemWebsite = document.createElement("calcite-button");
-        itemWebsite.setAttribute("id", "detail-item-website");
+        itemWebsite.id = "detail-item-website";
         itemWebsite.setAttribute("icon-end", "launch");
         itemWebsite.setAttribute("slot", "footer-actions");
         itemWebsite.setAttribute("scale", "l");
@@ -117,7 +117,7 @@ async function init() {
     view.goTo(
       {
         center: [result.geometry.longitude, result.geometry.latitude],
-        zoom: 10,
+        zoom: 13,
       },
       { duration: 400 }
     );
