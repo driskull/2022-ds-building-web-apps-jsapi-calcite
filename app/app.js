@@ -23,6 +23,7 @@ async function init() {
   // display requested item data
   // handle flow destroying dom of added panel...
   async function resultClickHandler(objectId) {
+    appState.savedExtent = view.extent.clone();
     appState.activeItem = true;
 
     const { features } = await collegeLayer.queryFeatures({
@@ -153,7 +154,7 @@ async function init() {
     }
 
     const schoolTypeValue = schoolTypeNode.value;
-    if (schoolTypeValue && schoolTypeValue !== "all") {
+    if (schoolTypeValue && schoolTypeValue !== config.defaultSchoolType) {
       where += combineSQLStatements(where, `NAICS_CODE = ${schoolTypeValue}`);
     }
 
@@ -165,7 +166,7 @@ async function init() {
   }
 
   function resetFilters() {
-    schoolTypeNode.value = "all";
+    schoolTypeNode.value = config.defaultSchoolType;
     appState.attendance = config.attendance;
     attendanceNode.minValue = config.attendance.min;
     attendanceNode.maxValue = config.attendance.max;
@@ -238,6 +239,7 @@ async function init() {
       }
 
       const chipPopulation = document.createElement("calcite-chip");
+      // todo: move to config
       const populationLevel =
         attributes["TOT_ENROLL"] > 15000
           ? "Large"
@@ -273,11 +275,10 @@ async function init() {
       item.appendChild(title);
       item.appendChild(summary);
 
-      // add listener to display data on list item click
-      item.addEventListener("click", () => {
-        appState.savedExtent = view.extent.clone();
-        resultClickHandler(result.attributes[collegeLayer.objectIdField]);
-      });
+      item.addEventListener("click", () =>
+        resultClickHandler(result.attributes[collegeLayer.objectIdField])
+      );
+
       item.addEventListener("click", (e) =>
         e.target.setAttribute("selected", true)
       );
@@ -288,7 +289,7 @@ async function init() {
 
   const map = new WebMap({
     portalItem: {
-      id: "8e3d0497739a4c819d086ab59c3912d5",
+      id: config.webmap,
     },
   });
 

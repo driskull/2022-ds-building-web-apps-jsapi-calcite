@@ -1,4 +1,6 @@
 export const config = {
+  webmap: "8e3d0497739a4c819d086ab59c3912d5",
+  defaultSchoolType: "all",
   schoolTypes: {
     611110: "Elementary and Secondary Schools",
     611210: "Junior Colleges",
