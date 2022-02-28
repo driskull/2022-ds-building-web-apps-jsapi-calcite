@@ -4,7 +4,7 @@ import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 
-import { config } from "./config";
+import { appConfig } from "./config";
 import { appState } from "./state";
 
 async function init() {
@@ -30,7 +30,7 @@ async function init() {
       returnGeometry: true,
       outSpatialReference: view.spatialReference,
       objectIds: [objectId],
-      outFields: config.collegeLayerOutFields,
+      outFields: appConfig.collegeLayerOutFields,
     });
 
     const result = features[0];
@@ -153,26 +153,22 @@ async function init() {
     }
 
     const schoolTypeValue = schoolTypeNode.value;
-    if (schoolTypeValue && schoolTypeValue !== config.defaultSchoolType) {
+    if (schoolTypeValue && schoolTypeValue !== appConfig.defaultSchoolType) {
       where += combineSQLStatements(where, `NAICS_CODE = ${schoolTypeValue}`);
     }
 
     return where;
   }
 
-  function setQuerying(value) {
-    resultBlockNode.loading = value;
-  }
-
   function resetFilters() {
-    schoolTypeNode.value = config.defaultSchoolType;
-    appState.attendance = config.attendance;
-    attendanceNode.minValue = config.attendance.min;
-    attendanceNode.maxValue = config.attendance.max;
-    appState.housing = config.housing;
-    housingSectionNode.open = config.housing.enabled;
-    housingNode.minValue = config.housing.min;
-    housingNode.maxValue = config.housing.max;
+    schoolTypeNode.value = appConfig.defaultSchoolType;
+    appState.attendance = appConfig.attendance;
+    attendanceNode.minValue = appConfig.attendance.min;
+    attendanceNode.maxValue = appConfig.attendance.max;
+    appState.housing = appConfig.housing;
+    housingSectionNode.open = appConfig.housing.enabled;
+    housingNode.minValue = appConfig.housing.min;
+    housingNode.maxValue = appConfig.housing.max;
     appState.hasFilterChanges = false;
     queryItems();
   }
@@ -185,7 +181,7 @@ async function init() {
       return;
     }
 
-    setQuerying(true);
+    resultBlockNode.loading = true;
 
     await collegeLayer.load();
 
@@ -206,17 +202,20 @@ async function init() {
       where,
     };
 
-    paginationNode.hidden = appState.count <= config.pageNum;
+    paginationNode.hidden = appState.count <= appConfig.pageNum;
 
     const results = await collegeLayer.queryFeatures({
       start,
-      num: config.pageNum,
+      num: appConfig.pageNum,
       geometry: view.extent.clone(),
       where: whereClause(),
-      outFields: [...config.collegeLayerOutFields, collegeLayer.objectIdField],
+      outFields: [
+        ...appConfig.collegeLayerOutFields,
+        collegeLayer.objectIdField,
+      ],
     });
 
-    setQuerying(false);
+    resultBlockNode.loading = false;
 
     resultBlockNode.summary = `${appState.count} universities found within the map.`;
 
@@ -235,7 +234,6 @@ async function init() {
       }
 
       const chipPopulation = document.createElement("calcite-chip");
-      // todo: move to config
       const populationLevel =
         attributes["TOT_ENROLL"] > 15000
           ? "Large"
@@ -284,7 +282,7 @@ async function init() {
 
   const map = new WebMap({
     portalItem: {
-      id: config.webmap,
+      id: appConfig.webmap,
     },
   });
 
@@ -319,9 +317,10 @@ async function init() {
   await view.when();
 
   const collegeLayer = view.map.layers.find(
-    (layer) => layer.url === config.collegeLayerUrl
+    (layer) => layer.url === appConfig.collegeLayerUrl
   );
 
+  // View clicking
   view.on("click", async (event) => {
     const response = await view.hitTest(event);
 
@@ -340,10 +339,11 @@ async function init() {
     resultClickHandler(graphic.attributes[collegeLayer.objectIdField]);
   });
 
-  attendanceNode.min = config.attendance.min;
-  attendanceNode.max = config.attendance.max;
-  attendanceNode.minValue = config.attendance.min;
-  attendanceNode.maxValue = config.attendance.max;
+  // Attendance
+  attendanceNode.min = appConfig.attendance.min;
+  attendanceNode.max = appConfig.attendance.max;
+  attendanceNode.minValue = appConfig.attendance.min;
+  attendanceNode.maxValue = appConfig.attendance.max;
   attendanceNode.addEventListener("calciteSliderChange", (event) => {
     appState.attendance.min = event.target.minValue;
     appState.attendance.max = event.target.maxValue;
@@ -351,17 +351,17 @@ async function init() {
     queryItems();
   });
 
-  housingSectionNode.open = config.housing.enabled;
+  // Housing
+  housingSectionNode.open = appConfig.housing.enabled;
   housingSectionNode.addEventListener("calciteBlockSectionToggle", (event) => {
     appState.housing.enabled = event.target.open;
     appState.hasFilterChanges = true;
     queryItems();
   });
-
-  housingNode.min = config.housing.min;
-  housingNode.max = config.housing.max;
-  housingNode.minValue = config.housing.min;
-  housingNode.maxValue = config.housing.max;
+  housingNode.min = appConfig.housing.min;
+  housingNode.max = appConfig.housing.max;
+  housingNode.minValue = appConfig.housing.min;
+  housingNode.maxValue = appConfig.housing.max;
   housingNode.addEventListener("calciteSliderChange", (event) => {
     appState.housing.min = event.target.minValue;
     appState.housing.max = event.target.maxValue;
@@ -369,26 +369,29 @@ async function init() {
     queryItems();
   });
 
-  for (const [key, value] of Object.entries(config.schoolTypes)) {
+  // School type select
+  for (const [key, value] of Object.entries(appConfig.schoolTypes)) {
     const option = document.createElement("calcite-option");
     option.value = key;
     option.innerText = value;
     schoolTypeNode.appendChild(option);
   }
-
   schoolTypeNode.addEventListener("calciteSelectChange", () => {
     appState.hasFilterChanges = true;
     queryItems();
   });
 
-  paginationNode.num = config.pageNum;
+  // Pagination
+  paginationNode.num = appConfig.pageNum;
   paginationNode.start = 1;
   paginationNode.addEventListener("calcitePaginationChange", (event) => {
     queryItems(event.detail.start - 1);
   });
 
+  // Reset button
   resetNode.addEventListener("click", () => resetFilters());
 
+  // View extent changes
   view.watch("center", () => !appState.activeItem && queryItems());
 
   queryItems();
