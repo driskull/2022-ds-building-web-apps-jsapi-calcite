@@ -66,8 +66,10 @@ async function init() {
       );
       item.setAttribute("id", "detail-panel");
       item.addEventListener("calcitePanelBackClick", async () => {
-        await view.goTo(savedExtent);
-        savedExtent = null;
+        if (savedExtent) {
+          await view.goTo(savedExtent);
+          savedExtent = null;
+        }
         activeItem = false;
         filtersNode.disabled = false;
       });
@@ -209,7 +211,7 @@ async function init() {
     }
 
     collegeLayerView.filter = {
-      where
+      where,
     };
 
     paginationNode.hidden = count <= pageNum;
