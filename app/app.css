@@ -2,6 +2,8 @@
   height: 100%;
   width: 100%;
   margin: 0;
+  margin-left: 340px;
+  border-top: 1px solid var(--calcite-ui-border-3);
   padding: 0;
 }
 
@@ -31,9 +33,6 @@ calcite-shell {
   padding: 1.25rem 0.75rem;
   font-size: 20px;
   font-weight: 500;
-  border-top: 1px solid var(--calcite-ui-border-3);
-  border-left: 1px solid var(--calcite-ui-border-3);
-  border-right: 1px solid var(--calcite-ui-border-3);
   display: flex;
   align-items: center;
   color: purple;
@@ -42,4 +41,20 @@ calcite-shell {
 .temporary-header calcite-icon {
   --calcite-ui-icon-color: purple;
   margin-inline-end: 1rem;
+}
+
+/* styling for chip select */
+#programType calcite-chip {
+  margin-inline-end: 0.5rem;
+  margin-block-start: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px transparent 0 0 0 4px transparent;
+  transition: box-shadow 0.15s ease-in-out;
+  --calcite-ui-info: var(--calcite-ui-brand);
+}
+
+#programType calcite-chip:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--calcite-ui-foreground-1),
+    0 0 0 4px var(--calcite-ui-brand);
 }

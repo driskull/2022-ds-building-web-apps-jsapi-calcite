@@ -18,6 +18,7 @@ export const appConfig = {
     "WEBSITE",
     "TOT_ENROLL",
     "DORM_CAP",
+    "DEG_GRANT",
   ],
   attendance: { min: 0, max: 160000 },
   housing: { enabled: false, min: 0, max: 20000 },
