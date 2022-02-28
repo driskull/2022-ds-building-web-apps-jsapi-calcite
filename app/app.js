@@ -30,8 +30,6 @@ async function init() {
   // display requested item data
   // handle flow destroying dom of added panel...
   async function resultClickHandler(objectId) {
-    savedExtent = view.extent.clone();
-    savedStart = paginationNode.start - 1;
     const { features } = await collegeLayer.queryFeatures({
       returnGeometry: true,
       outSpatialReference: view.spatialReference,
@@ -72,7 +70,6 @@ async function init() {
         savedExtent = null;
         activeItem = false;
         filtersNode.disabled = false;
-        queryItems(savedStart);
       });
 
       const block = document.createElement("calcite-block");
@@ -296,9 +293,10 @@ async function init() {
         item.appendChild(summary);
 
         // add listener to display data on list item click
-        item.addEventListener("click", () =>
-          resultClickHandler(result.attributes[collegeLayer.objectIdField])
-        );
+        item.addEventListener("click", () => {
+          savedExtent = view.extent.clone();
+          resultClickHandler(result.attributes[collegeLayer.objectIdField]);
+        });
         item.addEventListener("click", (e) =>
           e.target.setAttribute("selected", true)
         );
@@ -424,7 +422,6 @@ async function init() {
   let count = 0;
   let activeItem = false;
   let savedExtent = null;
-  let savedStart = 0;
   let hasFilterChanges = false;
 
   const paginationNode = document.getElementById("pagination");
