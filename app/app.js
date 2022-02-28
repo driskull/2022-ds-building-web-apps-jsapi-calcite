@@ -233,7 +233,10 @@ async function init() {
     resultsNode.innerHTML = "";
     results.features.map((result) => {
       const attributes = result.attributes;
+      const itemButton = document.createElement("button");
+      itemButton.className = "item-button";
       const item = document.createElement("calcite-card");
+      itemButton.appendChild(item);
 
       if (parseInt(attributes["DORM_CAP"]) !== -999) {
         const chipDorm = document.createElement("calcite-chip");
@@ -281,13 +284,11 @@ async function init() {
       item.appendChild(title);
       item.appendChild(summary);
 
-      item.addEventListener("click", () =>
+      itemButton.addEventListener("click", () =>
         resultClickHandler(result.attributes[collegeLayer.objectIdField])
       );
 
-      item.addEventListener("click", (e) => (e.target.selected = true));
-
-      resultsNode.appendChild(item);
+      resultsNode.appendChild(itemButton);
     });
   }
 
