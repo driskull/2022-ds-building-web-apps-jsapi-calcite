@@ -3,7 +3,6 @@ import MapView from "https://js.arcgis.com/4.22/@arcgis/core/views/MapView.js";
 import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
-import FeatureFilter from "https://js.arcgis.com/4.22/@arcgis/core/layers/support/FeatureFilter.js";
 import { whenFalseOnce } from "https://js.arcgis.com/4.22/@arcgis/core/core/watchUtils.js";
 
 import { appConfig } from "./config.js";
@@ -29,7 +28,7 @@ async function init() {
     appState.savedExtent = view.extent.clone();
     appState.activeItem = true;
 
-    const { features } = await collegeLayer.queryFeatures({
+    const { features } = await collegeLayerView.queryFeatures({
       returnGeometry: true,
       outSpatialReference: view.spatialReference,
       objectIds: [objectId],
@@ -217,13 +216,13 @@ async function init() {
     resetNode.hidden = !appState.hasFilterChanges;
     resetNode.indicator = appState.hasFilterChanges;
 
-    if (!collegeLayer) {
+    if (!collegeLayerView) {
       return;
     }
 
     resultBlockNode.loading = true;
 
-    await collegeLayer.load();
+    await whenFalseOnce(collegeLayerView, "updating");
 
     const where = whereClause();
 
@@ -236,10 +235,12 @@ async function init() {
       paginationNode.start = 1;
     }
 
-    await whenFalseOnce(collegeLayerView, "updating");
-    collegeLayerView.filter = new FeatureFilter({
-      where: where,
-    });
+    collegeLayerView.featureEffect  = {
+      filter: {
+        where: where
+      },
+      excludedEffect: "grayscale(80%) opacity(30%)"
+    };
 
     paginationNode.hidden = appState.count <= appConfig.pageNum;
 
@@ -337,7 +338,16 @@ async function init() {
     (layer) => layer.url === appConfig.collegeLayerUrl
   );
 
-  collegeLayer.outFields = ["*"];
+  if (!collegeLayer) {
+    return;
+  }
+
+  await collegeLayer.load();
+
+  collegeLayer.outFields = [
+    ...appConfig.collegeLayerOutFields,
+    collegeLayer.objectIdField,
+  ];
   const collegeLayerView = await view.whenLayerView(collegeLayer);
 
   // View clicking

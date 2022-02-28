@@ -14,7 +14,7 @@ export const appConfig = {
     "Post-graduate certificate": [6, 8],
     "In-betweenies": [1, 2, 4],
   },
-  pageNum: 10,
+  pageNum: 25,
   collegeLayerUrl:
     "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_Colleges_and_Universities/FeatureServer",
   collegeLayerOutFields: [
