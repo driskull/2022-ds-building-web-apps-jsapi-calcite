@@ -292,15 +292,15 @@ async function init() {
       });
     } else {
       const notice = document.createElement("calcite-notice");
-      notice.setAttribute("active", true);
-      notice.setAttribute("width", "full");
+      notice.active = true;
+      notice.width = "full";
 
       const title = document.createElement("span");
-      title.setAttribute("slot", "title");
+      title.slot = "title";
       title.innerText = "No results in view";
 
       const message = document.createElement("span");
-      message.setAttribute("slot", "message");
+      message.slot = "message";
       message.innerText = "TODO - <reset filters> or <reset map view>";
 
       notice.appendChild(title);
