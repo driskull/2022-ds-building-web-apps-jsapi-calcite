@@ -4,48 +4,32 @@ import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 
-const pageNum = 10;
+import { config } from "./config";
 
-const schoolTypes = {
-  611110: "Elementary and Secondary Schools",
-  611210: "Junior Colleges",
-  611310: "Colleges",
-  611410: "Business and Secretarial Schools",
-  611420: "Computer Training",
-  611430: "Professional and Management Development Training",
-  611511: "Cosmetology and Barber Schools",
-  611512: "Flight Training",
-  611513: "Apprenticeship Training",
-  611519: "Other Technical and Trade Schools",
-  611610: "Fine Arts Schools",
-  611620: "Sports and Recreation Instruction",
-  611630: "Language Schools",
-  611691: "Exam Preparation and Tutoring",
-  611692: "Automobile Driving Schools",
-  611699: "All Other Miscellaneous Schools and Instruction",
-  611710: "Educational Support Services",
-};
+import { appState } from "./state";
 
 async function init() {
+  const resultsNode = document.getElementById("results");
+  const attendanceNode = document.getElementById("attendance");
+  const housingSectionNode = document.getElementById("housing-section");
+  const housingNode = document.getElementById("housing");
+  const schoolTypeNode = document.getElementById("schoolType");
+  const resultBlockNode = document.getElementById("resultBlock");
+  const paginationNode = document.getElementById("pagination");
+  const filtersNode = document.getElementById("filters");
+  const resetNode = document.getElementById("reset");
+  const flowNode = document.getElementById("flow");
+
   // display requested item data
   // handle flow destroying dom of added panel...
   async function resultClickHandler(objectId) {
-    activeItem = true;
+    appState.activeItem = true;
 
     const { features } = await collegeLayer.queryFeatures({
       returnGeometry: true,
       outSpatialReference: view.spatialReference,
       objectIds: [objectId],
-      outFields: [
-        "NAICS_DESC",
-        "STATE",
-        "ADDRESS",
-        "CITY",
-        "NAME",
-        "WEBSITE",
-        "TOT_ENROLL",
-        "DORM_CAP",
-      ],
+      outFields: config.collegeLayerOutFields,
     });
 
     const result = features[0];
@@ -56,9 +40,9 @@ async function init() {
 
     filtersNode.disabled = true;
     const attributes = result.attributes;
-    const panelExists = document.getElementById("detail-panel");
+    const detailPanelNode = document.getElementById("detail-panel");
     // a janky way to replace content in a single panel vs appending entire new one each time
-    if (!panelExists) {
+    if (!detailPanelNode) {
       const item = document.createElement("calcite-panel");
       item.setAttribute("heading", handleCasing(attributes["NAME"]));
       item.setAttribute(
@@ -67,11 +51,11 @@ async function init() {
       );
       item.setAttribute("id", "detail-panel");
       item.addEventListener("calcitePanelBackClick", async () => {
-        if (savedExtent) {
-          await view.goTo(savedExtent);
-          savedExtent = null;
+        if (appState.savedExtent) {
+          await view.goTo(appState.savedExtent);
+          appState.savedExtent = null;
         }
-        activeItem = false;
+        appState.activeItem = false;
         filtersNode.disabled = false;
       });
 
@@ -107,11 +91,9 @@ async function init() {
       }
 
       item.appendChild(block);
-      document.getElementById("flow").appendChild(item);
+      flowNode.appendChild(item);
     } else {
-      document
-        .getElementById("detail-panel")
-        .setAttribute("heading", handleCasing(attributes["NAME"]));
+      detailPanelNode.setAttribute("heading", handleCasing(attributes["NAME"]));
       document.getElementById(
         "detail-chip-type"
       ).innerText = `type: ${handleCasing(attributes["NAICS_DESC"])}`;
@@ -147,15 +129,27 @@ async function init() {
   function whereClause() {
     let where = "TOT_ENROLL > 100";
 
-    if (attendance) {
-      where += combineSQLStatements(where, `TOT_ENROLL > ${attendance.min}`);
-      where += combineSQLStatements(where, `TOT_ENROLL < ${attendance.max}`);
+    if (appState.attendance) {
+      where += combineSQLStatements(
+        where,
+        `TOT_ENROLL > ${appState.attendance.min}`
+      );
+      where += combineSQLStatements(
+        where,
+        `TOT_ENROLL < ${appState.attendance.max}`
+      );
     }
 
-    if (housing?.enabled) {
+    if (appState.housing?.enabled) {
       where += combineSQLStatements(where, `HOUSING=1`);
-      where += combineSQLStatements(where, `DORM_CAP > ${housing.min}`);
-      where += combineSQLStatements(where, `DORM_CAP < ${housing.max}`);
+      where += combineSQLStatements(
+        where,
+        `DORM_CAP > ${appState.housing.min}`
+      );
+      where += combineSQLStatements(
+        where,
+        `DORM_CAP < ${appState.housing.max}`
+      );
     }
 
     const schoolTypeValue = schoolTypeNode.value;
@@ -167,28 +161,28 @@ async function init() {
   }
 
   function setQuerying(value) {
-    resultBlock.loading = value;
+    resultBlockNode.loading = value;
   }
 
   function resetFilters() {
     schoolTypeNode.value = "all";
-    attendance.min = 0;
-    attendance.max = 160000;
-    attendanceNode.minValue = attendance.min;
-    attendanceNode.maxValue = attendance.max;
-    housing.enabled = false;
-    housing.min = 0;
-    housing.max = 20000;
-    housingSectionNode.open = housing.enabled;
-    housingNode.minValue = housing.min;
-    housingNode.maxValue = housing.max;
-    hasFilterChanges = false;
+    appState.attendance.min = config.attendance.min;
+    appState.attendance.max = config.attendance.min;
+    attendanceNode.minValue = config.attendance.min;
+    attendanceNode.maxValue = config.attendance.max;
+    appState.housing.enabled = config.housing.enabled;
+    appState.housing.min = config.housing.min;
+    appState.housing.max = config.housing.max;
+    housingSectionNode.open = config.housing.enabled;
+    housingNode.minValue = config.housing.min;
+    housingNode.maxValue = config.housing.max;
+    appState.hasFilterChanges = false;
     queryItems();
   }
 
   async function queryItems(start = 0) {
-    resetNode.hidden = !hasFilterChanges;
-    resetNode.indicator = hasFilterChanges;
+    resetNode.hidden = !appState.hasFilterChanges;
+    resetNode.indicator = appState.hasFilterChanges;
 
     if (!collegeLayer) {
       return;
@@ -203,11 +197,11 @@ async function init() {
     const where = whereClause();
 
     if (start === 0) {
-      count = await collegeLayer.queryFeatureCount({
+      appState.count = await collegeLayer.queryFeatureCount({
         geometry: view.extent.clone(),
         where,
       });
-      paginationNode.total = count;
+      paginationNode.total = appState.count;
       paginationNode.start = 1;
     }
 
@@ -215,102 +209,88 @@ async function init() {
       where,
     };
 
-    paginationNode.hidden = count <= pageNum;
+    paginationNode.hidden = appState.count <= config.pageNum;
 
     const results = await collegeLayer.queryFeatures({
       start,
-      num: pageNum,
+      num: config.pageNum,
       geometry: view.extent.clone(),
       where: whereClause(),
-      outFields: [
-        "NAICS_DESC",
-        "STATE",
-        "ADDRESS",
-        "CITY",
-        "NAME",
-        "TOT_ENROLL",
-        "WEBSITE",
-        "DORM_CAP",
-        collegeLayer.objectIdField,
-      ],
+      outFields: [...config.collegeLayerOutFields, collegeLayer.objectIdField],
     });
-
-    console.log({ results });
 
     setQuerying(false);
 
-    resultBlock.setAttribute(
+    resultBlockNode.setAttribute(
       "summary",
-      `${count} universities found within the map.`
+      `${appState.count} universities found within the map.`
     );
 
-    document.getElementById("results").innerHTML = "";
-    results.features
-      .map((result) => {
-        const attributes = result.attributes;
-        const item = document.createElement("calcite-card");
+    resultsNode.innerHTML = "";
+    results.features.map((result) => {
+      const attributes = result.attributes;
+      const item = document.createElement("calcite-card");
 
-        if (parseInt(attributes["DORM_CAP"]) !== -999) {
-          const chipDorm = document.createElement("calcite-chip");
-          chipDorm.setAttribute("icon", "locator");
-          chipDorm.setAttribute("slot", "footer-trailing");
-          chipDorm.setAttribute("scale", "s");
-          chipDorm.innerText = "Dorm";
-          item.appendChild(chipDorm);
-        }
+      if (parseInt(attributes["DORM_CAP"]) !== -999) {
+        const chipDorm = document.createElement("calcite-chip");
+        chipDorm.setAttribute("icon", "locator");
+        chipDorm.setAttribute("slot", "footer-trailing");
+        chipDorm.setAttribute("scale", "s");
+        chipDorm.innerText = "Dorm";
+        item.appendChild(chipDorm);
+      }
 
-        const chipPopulation = document.createElement("calcite-chip");
-        const populationLevel =
-          attributes["TOT_ENROLL"] > 15000
-            ? "Large"
-            : attributes["TOT_ENROLL"] > 5000
-            ? "Medium"
-            : "Small";
-        chipPopulation.setAttribute("icon", "users");
-        chipPopulation.setAttribute("slot", "footer-trailing");
-        chipPopulation.setAttribute("scale", "s");
-        chipPopulation.innerText = populationLevel;
-        item.appendChild(chipPopulation);
+      const chipPopulation = document.createElement("calcite-chip");
+      const populationLevel =
+        attributes["TOT_ENROLL"] > 15000
+          ? "Large"
+          : attributes["TOT_ENROLL"] > 5000
+          ? "Medium"
+          : "Small";
+      chipPopulation.setAttribute("icon", "users");
+      chipPopulation.setAttribute("slot", "footer-trailing");
+      chipPopulation.setAttribute("scale", "s");
+      chipPopulation.innerText = populationLevel;
+      item.appendChild(chipPopulation);
 
-        const chipState = document.createElement("calcite-chip");
-        chipState.setAttribute("icon", "gps-on");
-        chipState.setAttribute("slot", "footer-leading");
-        chipState.setAttribute("scale", "s");
-        chipState.innerText = attributes["STATE"];
-        item.appendChild(chipState);
+      const chipState = document.createElement("calcite-chip");
+      chipState.setAttribute("icon", "gps-on");
+      chipState.setAttribute("slot", "footer-leading");
+      chipState.setAttribute("scale", "s");
+      chipState.innerText = attributes["STATE"];
+      item.appendChild(chipState);
 
-        const title = document.createElement("span");
-        title.setAttribute("slot", "title");
-        title.innerText = handleCasing(attributes["NAME"]);
+      const title = document.createElement("span");
+      title.setAttribute("slot", "title");
+      title.innerText = handleCasing(attributes["NAME"]);
 
-        const avatar = document.createElement("calcite-avatar");
-        avatar.setAttribute("scale", "s");
-        avatar.setAttribute("username", attributes["NAME"].slice(0, 2));
-        title.insertAdjacentElement("afterbegin", avatar);
+      const avatar = document.createElement("calcite-avatar");
+      avatar.setAttribute("scale", "s");
+      avatar.setAttribute("username", attributes["NAME"].slice(0, 2));
+      title.insertAdjacentElement("afterbegin", avatar);
 
-        const summary = document.createElement("span");
-        summary.setAttribute("slot", "subtitle");
-        summary.innerText = handleCasing(attributes["NAICS_DESC"]);
+      const summary = document.createElement("span");
+      summary.setAttribute("slot", "subtitle");
+      summary.innerText = handleCasing(attributes["NAICS_DESC"]);
 
-        item.appendChild(title);
-        item.appendChild(summary);
+      item.appendChild(title);
+      item.appendChild(summary);
 
-        // add listener to display data on list item click
-        item.addEventListener("click", () => {
-          savedExtent = view.extent.clone();
-          resultClickHandler(result.attributes[collegeLayer.objectIdField]);
-        });
-        item.addEventListener("click", (e) =>
-          e.target.setAttribute("selected", true)
-        );
-
-        document.getElementById("results").appendChild(item);
+      // add listener to display data on list item click
+      item.addEventListener("click", () => {
+        appState.savedExtent = view.extent.clone();
+        resultClickHandler(result.attributes[collegeLayer.objectIdField]);
       });
+      item.addEventListener("click", (e) =>
+        e.target.setAttribute("selected", true)
+      );
+
+      resultsNode.appendChild(item);
+    });
   }
 
   const map = new WebMap({
     portalItem: {
-      // autocasts as new PortalItem()
       id: "8e3d0497739a4c819d086ab59c3912d5",
     },
   });
@@ -318,7 +298,6 @@ async function init() {
   const view = new MapView({
     container: "viewDiv",
     map,
-    // to do set the width of panel w css var as constant
     padding: {
       left: 340,
     },
@@ -347,14 +326,9 @@ async function init() {
   await view.when();
 
   const collegeLayer = view.map.layers.find(
-    (layer) =>
-      layer.url ===
-      "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_Colleges_and_Universities/FeatureServer"
+    (layer) => layer.url === config.collegeLayerUrl
   );
 
-  console.log({ collegeLayer });
-
-  // handle click on map point
   view.on("click", async (event) => {
     const response = await view.hitTest(event);
 
@@ -363,8 +337,6 @@ async function init() {
         result.graphic.sourceLayer.id === collegeLayer.id &&
         !result.graphic.isAggregate
     );
-
-    console.log(results);
 
     if (!results.length) {
       return;
@@ -375,71 +347,56 @@ async function init() {
     resultClickHandler(graphic.attributes[collegeLayer.objectIdField]);
   });
 
-  const attendance = { min: 0, max: 160000 };
-  const attendanceNode = document.getElementById("attendance");
-  attendanceNode.min = attendance.min;
-  attendanceNode.max = attendance.max;
-  attendanceNode.minValue = attendance.min;
-  attendanceNode.maxValue = attendance.max;
+  attendanceNode.min = config.attendance.min;
+  attendanceNode.max = config.attendance.max;
+  attendanceNode.minValue = config.attendance.min;
+  attendanceNode.maxValue = config.attendance.max;
   attendanceNode.addEventListener("calciteSliderChange", (event) => {
-    attendance.min = event.target.minValue;
-    attendance.max = event.target.maxValue;
-    hasFilterChanges = true;
+    appState.attendance.min = event.target.minValue;
+    appState.attendance.max = event.target.maxValue;
+    appState.hasFilterChanges = true;
     queryItems();
   });
 
-  const housing = { enabled: false, min: 0, max: 20000 };
-  const housingSectionNode = document.getElementById("housing-section");
-  housingSectionNode.open = housing.enabled;
+  housingSectionNode.open = config.housing.enabled;
   housingSectionNode.addEventListener("calciteBlockSectionToggle", (event) => {
-    housing.enabled = event.target.open;
-    hasFilterChanges = true;
-    queryItems();
-  });
-  const housingNode = document.getElementById("housing");
-  housingNode.min = housing.min;
-  housingNode.max = housing.max;
-  housingNode.minValue = housing.min;
-  housingNode.maxValue = housing.max;
-  housingNode.addEventListener("calciteSliderChange", (event) => {
-    housing.min = event.target.minValue;
-    housing.max = event.target.maxValue;
-    hasFilterChanges = true;
+    appState.housing.enabled = event.target.open;
+    appState.hasFilterChanges = true;
     queryItems();
   });
 
-  const schoolTypeNode = document.getElementById("schoolType");
-  for (const [key, value] of Object.entries(schoolTypes)) {
+  housingNode.min = config.housing.min;
+  housingNode.max = config.housing.max;
+  housingNode.minValue = config.housing.min;
+  housingNode.maxValue = config.housing.max;
+  housingNode.addEventListener("calciteSliderChange", (event) => {
+    appState.housing.min = event.target.minValue;
+    appState.housing.max = event.target.maxValue;
+    appState.hasFilterChanges = true;
+    queryItems();
+  });
+
+  for (const [key, value] of Object.entries(config.schoolTypes)) {
     const option = document.createElement("calcite-option");
     option.value = key;
     option.innerText = value;
     schoolTypeNode.appendChild(option);
   }
+
   schoolTypeNode.addEventListener("calciteSelectChange", () => {
-    hasFilterChanges = true;
+    appState.hasFilterChanges = true;
     queryItems();
   });
 
-  const resultBlock = document.getElementById("resultBlock");
-
-  let count = 0;
-  let activeItem = false;
-  let savedExtent = null;
-  let hasFilterChanges = false;
-
-  const paginationNode = document.getElementById("pagination");
-  paginationNode.num = pageNum;
+  paginationNode.num = config.pageNum;
   paginationNode.start = 1;
   paginationNode.addEventListener("calcitePaginationChange", (event) => {
     queryItems(event.detail.start - 1);
   });
 
-  const filtersNode = document.getElementById("filters");
-
-  const resetNode = document.getElementById("reset");
   resetNode.addEventListener("click", () => resetFilters());
 
-  view.watch("center", () => !activeItem && queryItems());
+  view.watch("center", () => !appState.activeItem && queryItems());
 
   queryItems();
 }
