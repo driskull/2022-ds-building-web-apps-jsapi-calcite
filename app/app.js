@@ -3,6 +3,8 @@ import MapView from "https://js.arcgis.com/4.22/@arcgis/core/views/MapView.js";
 import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
+import FeatureFilter from "https://js.arcgis.com/4.22/@arcgis/core/layers/support/FeatureFilter.js";
+import { whenFalseOnce } from "https://js.arcgis.com/4.22/@arcgis/core/core/watchUtils.js";
 
 import { appConfig } from "./config.js";
 import { appState } from "./state.js";
@@ -223,12 +225,10 @@ async function init() {
 
     await collegeLayer.load();
 
-    const collegeLayerView = await view.whenLayerView(collegeLayer);
-
     const where = whereClause();
 
     if (start === 0) {
-      appState.count = await collegeLayer.queryFeatureCount({
+      appState.count = await collegeLayerView.queryFeatureCount({
         geometry: view.extent.clone(),
         where,
       });
@@ -236,13 +236,14 @@ async function init() {
       paginationNode.start = 1;
     }
 
-    collegeLayerView.filter = {
-      where,
-    };
+    await whenFalseOnce(collegeLayerView, "updating");
+    collegeLayerView.filter = new FeatureFilter({
+      where: where,
+    });
 
     paginationNode.hidden = appState.count <= appConfig.pageNum;
 
-    const results = await collegeLayer.queryFeatures({
+    const results = await collegeLayerView.queryFeatures({
       start,
       num: appConfig.pageNum,
       geometry: view.extent.clone(),
@@ -260,7 +261,10 @@ async function init() {
     resultsNode.innerHTML = "";
     results.features.map((result) => {
       const attributes = result.attributes;
+      const itemButton = document.createElement("button");
+      itemButton.className = "item-button";
       const item = document.createElement("calcite-card");
+      itemButton.appendChild(item);
 
       if (parseInt(attributes["DORM_CAP"]) !== -999) {
         const chipDorm = document.createElement("calcite-chip");
@@ -288,13 +292,11 @@ async function init() {
       item.appendChild(title);
       item.appendChild(summary);
 
-      item.addEventListener("click", () =>
+      itemButton.addEventListener("click", () =>
         resultClickHandler(result.attributes[collegeLayer.objectIdField])
       );
 
-      item.addEventListener("click", (e) => (e.target.selected = true));
-
-      resultsNode.appendChild(item);
+      resultsNode.appendChild(itemButton);
     });
   }
 
@@ -334,6 +336,9 @@ async function init() {
   const collegeLayer = view.map.layers.find(
     (layer) => layer.url === appConfig.collegeLayerUrl
   );
+
+  collegeLayer.outFields = ["*"];
+  const collegeLayerView = await view.whenLayerView(collegeLayer);
 
   // View clicking
   view.on("click", async (event) => {
