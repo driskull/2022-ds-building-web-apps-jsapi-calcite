@@ -195,6 +195,8 @@ async function init() {
 
     await collegeLayer.load();
 
+    const collegeLayerView = await view.whenLayerView(collegeLayer);
+
     const where = whereClause();
 
     if (start === 0) {
@@ -206,7 +208,9 @@ async function init() {
       paginationNode.start = 1;
     }
 
-    collegeLayer.definitionExpression = where;
+    collegeLayerView.filter = {
+      where
+    };
 
     paginationNode.hidden = count <= pageNum;
 
