@@ -230,65 +230,83 @@ async function init() {
     resultBlockNode.summary = `${appState.count} universities found within the map.`;
 
     resultsNode.innerHTML = "";
-    results.features.map((result) => {
-      const attributes = result.attributes;
-      const itemButton = document.createElement("button");
-      itemButton.className = "item-button";
-      const item = document.createElement("calcite-card");
-      itemButton.appendChild(item);
+    if (results.features.length) {
+      results.features.map((result) => {
+        const attributes = result.attributes;
+        const itemButton = document.createElement("button");
+        itemButton.className = "item-button";
+        const item = document.createElement("calcite-card");
+        itemButton.appendChild(item);
 
-      if (parseInt(attributes["DORM_CAP"]) !== -999) {
-        const chipDorm = document.createElement("calcite-chip");
-        chipDorm.icon = "locator";
-        chipDorm.slot = "footer-trailing";
-        chipDorm.scale = "s";
-        chipDorm.innerText = "Dorm";
-        item.appendChild(chipDorm);
-      }
+        if (parseInt(attributes["DORM_CAP"]) !== -999) {
+          const chipDorm = document.createElement("calcite-chip");
+          chipDorm.icon = "locator";
+          chipDorm.slot = "footer-trailing";
+          chipDorm.scale = "s";
+          chipDorm.innerText = "Dorm";
+          item.appendChild(chipDorm);
+        }
 
-      const chipPopulation = document.createElement("calcite-chip");
-      const populationLevel =
-        attributes["TOT_ENROLL"] > 15000
-          ? "Large"
-          : attributes["TOT_ENROLL"] > 5000
-          ? "Medium"
-          : "Small";
-      chipPopulation.icon = "users";
-      chipPopulation.slot = "footer-trailing";
-      chipPopulation.scale = "s";
+        const chipPopulation = document.createElement("calcite-chip");
+        const populationLevel =
+          attributes["TOT_ENROLL"] > 15000
+            ? "Large"
+            : attributes["TOT_ENROLL"] > 5000
+            ? "Medium"
+            : "Small";
+        chipPopulation.icon = "users";
+        chipPopulation.slot = "footer-trailing";
+        chipPopulation.scale = "s";
 
-      chipPopulation.innerText = populationLevel;
-      item.appendChild(chipPopulation);
+        chipPopulation.innerText = populationLevel;
+        item.appendChild(chipPopulation);
 
-      const chipState = document.createElement("calcite-chip");
-      chipState.icon = "gps-on";
-      chipState.slot = "footer-leading";
-      chipState.scale = "s";
-      chipState.innerText = attributes["STATE"];
-      item.appendChild(chipState);
+        const chipState = document.createElement("calcite-chip");
+        chipState.icon = "gps-on";
+        chipState.slot = "footer-leading";
+        chipState.scale = "s";
+        chipState.innerText = attributes["STATE"];
+        item.appendChild(chipState);
+
+        const title = document.createElement("span");
+        title.slot = "title";
+        title.innerText = handleCasing(attributes["NAME"]);
+
+        const avatar = document.createElement("calcite-avatar");
+        avatar.scale = "s";
+        avatar.username = attributes["NAME"].slice(0, 2);
+        title.insertAdjacentElement("afterbegin", avatar);
+
+        const summary = document.createElement("span");
+        summary.slot = "subtitle";
+        summary.innerText = handleCasing(attributes["NAICS_DESC"]);
+
+        item.appendChild(title);
+        item.appendChild(summary);
+
+        itemButton.addEventListener("click", () =>
+          resultClickHandler(result.attributes[collegeLayer.objectIdField])
+        );
+
+        resultsNode.appendChild(itemButton);
+      });
+    } else {
+      const notice = document.createElement("calcite-notice");
+      notice.setAttribute("active", true);
+      notice.setAttribute("width", "full");
 
       const title = document.createElement("span");
-      title.slot = "title";
-      title.innerText = handleCasing(attributes["NAME"]);
+      title.setAttribute("slot", "title");
+      title.innerText = "No results in view";
 
-      const avatar = document.createElement("calcite-avatar");
-      avatar.scale = "s";
-      avatar.username = attributes["NAME"].slice(0, 2);
-      title.insertAdjacentElement("afterbegin", avatar);
+      const message = document.createElement("span");
+      message.setAttribute("slot", "message");
+      message.innerText = "TODO - <reset filters> or <reset map view>";
 
-      const summary = document.createElement("span");
-      summary.slot = "subtitle";
-      summary.innerText = handleCasing(attributes["NAICS_DESC"]);
-
-      item.appendChild(title);
-      item.appendChild(summary);
-
-      itemButton.addEventListener("click", () =>
-        resultClickHandler(result.attributes[collegeLayer.objectIdField])
-      );
-
-      resultsNode.appendChild(itemButton);
-    });
+      notice.appendChild(title);
+      notice.appendChild(message);
+      resultsNode.appendChild(notice);
+    }
   }
 
   const map = new WebMap({
