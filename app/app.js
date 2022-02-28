@@ -30,6 +30,8 @@ async function init() {
   // display requested item data
   // handle flow destroying dom of added panel...
   async function resultClickHandler(objectId) {
+    activeItem = true;
+
     const { features } = await collegeLayer.queryFeatures({
       returnGeometry: true,
       outSpatialReference: view.spatialReference,
@@ -52,7 +54,6 @@ async function init() {
       return;
     }
 
-    activeItem = true;
     filtersNode.disabled = true;
     const attributes = result.attributes;
     const panelExists = document.getElementById("detail-panel");
