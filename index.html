@@ -16,67 +16,66 @@
 </head>
 
 <body>
-  <calcite-shell class="calcite-presentation" content-behind>
-    <div class="temporary-header" slot="header">
-      <calcite-icon icon="education" scale="l"></calcite-icon>
-      UniversityFinder
-    </div>
-    <!-- the width-scale="" is a hack to let us set a static width - not sure if intended ...-->
-    <calcite-shell-panel slot="primary-panel" width-scale id="primary-panel">
-      <calcite-flow id="flow">
-        <calcite-panel heading="Results" id="resultBlock" loading>
-          <calcite-pagination id="pagination" slot="footer">
-          </calcite-pagination>
-          <calcite-block open>
-            <calcite-list id="results"></calcite-list>
-          </calcite-block>
-        </calcite-panel>
-      </calcite-flow>
-    </calcite-shell-panel>
-    <calcite-shell-center-row height-scale="l">
-      <div id="viewDiv"></div>
-    </calcite-shell-center-row>
-    <calcite-shell-panel slot="contextual-panel" detached>
-      <calcite-tooltip-manager>
+  <calcite-tooltip-manager>
+    <calcite-shell class="calcite-presentation" content-behind>
+      <div class="temporary-header" slot="header">
+        <calcite-icon icon="education" scale="l"></calcite-icon>
+        UniversityFinder
+      </div>
+      <!-- the width-scale="" is a hack to let us set a static width - not sure if intended ...-->
+      <calcite-shell-panel slot="primary-panel" width-scale id="primary-panel">
+        <calcite-flow id="flow">
+          <calcite-panel heading="Results" id="resultBlock" loading>
+            <calcite-pagination id="pagination" slot="footer">
+            </calcite-pagination>
+            <calcite-block open>
+              <calcite-list id="results"></calcite-list>
+            </calcite-block>
+          </calcite-panel>
+        </calcite-flow>
+      </calcite-shell-panel>
+      <calcite-shell-center-row height-scale="l">
+        <div id="viewDiv"></div>
+      </calcite-shell-center-row>
+      <calcite-shell-panel slot="contextual-panel" detached>
         <calcite-panel id="filters" heading="Filters">
-          <calcite-action id="reset" icon="reset" slot="header-actions-end" hidden>
-          </calcite-action>
-          <calcite-tooltip reference-element="reset" position="bottom">
-            Reset filters
-          </calcite-tooltip>
-          <calcite-block heading="Basics" open>
-            <calcite-label>
-              School type
-              <calcite-select id="schoolType">
-                <calcite-option value="all">All</calcite-option>
-              </calcite-select>
-            </calcite-label>
-            <calcite-label>
-              Program type
-              <div id="programType"></div>
-            </calcite-label>
-            <calcite-label>
-              Attendance range
-              <calcite-slider id="attendance" range label-handles min-value="0" max-value="160000" min="0" max="160000"
-                step="100">
-              </calcite-slider>
-            </calcite-label>
-          </calcite-block>
-          <calcite-block heading="Housing" open>
-            <calcite-block-section id="housingSection" text="Offers on campus housing" toggle-display="switch">
+          <calcite-action id="reset" icon="reset" slot="header-actions-end" hidden></calcite-action>
+          <div>
+            <calcite-block heading="Basics" open>
               <calcite-label>
-                Dormitory size
-                <calcite-slider id="housing" range label-handles min-value="0" max-value="20000" min="0" max="20000"
-                  step="100">
+                School type
+                <calcite-select id="schoolType">
+                  <calcite-option value="all">All</calcite-option>
+                </calcite-select>
+              </calcite-label>
+              <calcite-label>
+                Program type
+                <div id="programType"></div>
+              </calcite-label>
+              <calcite-label>
+                Attendance range
+                <calcite-slider id="attendance" range label-handles min-value="0" max-value="160000" min="0"
+                  max="160000" step="100">
                 </calcite-slider>
               </calcite-label>
-            </calcite-block-section>
-          </calcite-block>
+            </calcite-block>
+            <calcite-block heading="Housing" open>
+              <calcite-block-section id="housingSection" text="Offers on campus housing" toggle-display="switch">
+                <calcite-label>
+                  Dormitory size
+                  <calcite-slider id="housing" range label-handles min-value="0" max-value="20000" min="0" max="20000"
+                    step="100">
+                  </calcite-slider>
+                </calcite-label>
+              </calcite-block-section>
+            </calcite-block>
+          </div>
         </calcite-panel>
-      </calcite-tooltip-manager>
-    </calcite-shell-panel>
-  </calcite-shell>
-  <calcite-tooltip reference-element="reset">Reset filters</calcite-tooltip>
+
+      </calcite-shell-panel>
+    </calcite-shell>
+    <calcite-tooltip reference-element="reset">Reset filters</calcite-tooltip>
+  </calcite-tooltip-manager>
 </body>
 
 </html>
