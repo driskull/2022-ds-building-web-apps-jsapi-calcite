@@ -122,8 +122,8 @@ async function init() {
       .join(" ");
   }
 
-  function combineSQLStatements(where, sql) {
-    return where ? ` AND (${sql})` : `(${sql})`;
+  function combineSQLStatements(where, sql, operator = "AND") {
+    return where ? ` ${operator} (${sql})` : `(${sql})`;
   }
 
   function whereClause() {
@@ -154,7 +154,17 @@ async function init() {
 
     const schoolTypeValue = schoolTypeNode.value;
     if (schoolTypeValue && schoolTypeValue !== appConfig.defaultSchoolType) {
-      where += combineSQLStatements(where, `NAICS_CODE = ${schoolTypeValue}`);
+      const values = schoolTypeValue.split(",");
+      let schoolWhere = "";
+      values.forEach(
+        (value) =>
+          (schoolWhere += combineSQLStatements(
+            schoolWhere,
+            `NAICS_CODE = ${value}`,
+            "OR"
+          ))
+      );
+      where += combineSQLStatements(where, schoolWhere);
     }
 
     return where;
@@ -372,8 +382,8 @@ async function init() {
   // School type select
   for (const [key, value] of Object.entries(appConfig.schoolTypes)) {
     const option = document.createElement("calcite-option");
-    option.value = key;
-    option.innerText = value;
+    option.value = value.join(",");
+    option.innerText = key;
     schoolTypeNode.appendChild(option);
   }
   schoolTypeNode.addEventListener("calciteSelectChange", () => {
