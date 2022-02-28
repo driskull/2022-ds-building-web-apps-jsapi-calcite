@@ -28,7 +28,7 @@ async function init() {
     appState.savedExtent = view.extent.clone();
     appState.activeItem = true;
 
-    const { features } = await collegeLayer.queryFeatures({
+    const { features } = await collegeLayerView.queryFeatures({
       returnGeometry: true,
       outSpatialReference: view.spatialReference,
       objectIds: [objectId],
@@ -189,13 +189,13 @@ async function init() {
     resetNode.hidden = !appState.hasFilterChanges;
     resetNode.indicator = appState.hasFilterChanges;
 
-    if (!collegeLayer) {
+    if (!collegeLayerView) {
       return;
     }
 
     resultBlockNode.loading = true;
 
-    await collegeLayer.load();
+    await whenFalseOnce(collegeLayerView, "updating");
 
     const where = whereClause();
 
@@ -208,7 +208,6 @@ async function init() {
       paginationNode.start = 1;
     }
 
-    await whenFalseOnce(collegeLayerView, "updating");
     collegeLayerView.filter = new FeatureFilter({
       where: where,
     });
@@ -332,7 +331,16 @@ async function init() {
     (layer) => layer.url === appConfig.collegeLayerUrl
   );
 
-  collegeLayer.outFields = ["*"];
+  if (!collegeLayer) {
+    return;
+  }
+
+  await collegeLayer.load();
+
+  collegeLayer.outFields = [
+    ...appConfig.collegeLayerOutFields,
+    collegeLayer.objectIdField,
+  ];
   const collegeLayerView = await view.whenLayerView(collegeLayer);
 
   // View clicking

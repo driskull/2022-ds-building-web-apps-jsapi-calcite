@@ -10,6 +10,7 @@ export const appConfig = {
   collegeLayerUrl:
     "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_Colleges_and_Universities/FeatureServer",
   collegeLayerOutFields: [
+    "ObjectId2",
     "NAICS_DESC",
     "STATE",
     "ADDRESS",
