@@ -239,17 +239,13 @@ async function init() {
 
     setQuerying(false);
 
-    // todo: setup pagination
     resultBlock.setAttribute(
       "summary",
       `${count} universities found within the map.`
     );
-    // todo should filter existing not wholesale zero out and replace...
+
     document.getElementById("results").innerHTML = "";
-    // temp only show 100 - rendering like this not functioning well
     results.features
-      .slice(0, 99)
-      .sort((a, b) => a.attributes["NAME"].localeCompare(b.attributes["NAME"]))
       .map((result) => {
         const attributes = result.attributes;
         const item = document.createElement("calcite-card");
