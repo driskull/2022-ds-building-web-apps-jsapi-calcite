@@ -73,10 +73,10 @@ async function init() {
       if (attributes["WEBSITE"]) {
         const itemWebsite = document.createElement("calcite-button");
         itemWebsite.id = "detail-item-website";
-        itemWebsite.setAttribute("icon-end", "launch");
-        itemWebsite.setAttribute("slot", "footer-actions");
-        itemWebsite.setAttribute("scale", "l");
-        itemWebsite.setAttribute("width", "full");
+        itemWebsite.iconEnd = "launch";
+        itemWebsite.slot = "footer-actions";
+        itemWebsite.scale = "l";
+        itemWebsite.width = "full";
         itemWebsite.innerText = `Learn more`;
         itemWebsite.href = `http://${attributes["WEBSITE"]}`;
         itemWebsite.rel = `noref noreferrer`;
@@ -206,8 +206,8 @@ async function init() {
     housingNode.minValue = appConfig.housing.min;
     housingNode.maxValue = appConfig.housing.max;
     appState.activeProgramTypes = [];
-    [...document.querySelectorAll(`[data-type*="type-chip"]`)].forEach((item) =>
-      item.setAttribute("color", "grey")
+    [...document.querySelectorAll(`[data-type*="type"]`)].forEach(
+      (item) => (item.color = "grey")
     );
     appState.hasFilterChanges = false;
     queryItems();
@@ -404,8 +404,8 @@ async function init() {
   // Degree type chip select
   for (const [key, value] of Object.entries(appConfig.programTypes)) {
     const chip = document.createElement("calcite-chip");
-    chip.setAttribute("tabindex", "0");
-    chip.setAttribute("data-type", "type-chip");
+    chip.tabIndex = 0;
+    chip.dataset.type = "type";
     chip.value = value;
     chip.innerText = key;
     chip.addEventListener("click", (event) =>
@@ -418,10 +418,10 @@ async function init() {
     let items = appState.activeProgramTypes;
     if (!items.includes(value)) {
       items.push(value);
-      event.target.setAttribute("color", "blue");
+      event.target.color = "blue";
     } else {
       items = items.filter((item) => item !== value);
-      event.target.setAttribute("color", "grey");
+      event.target.color = "grey";
     }
     appState.activeProgramTypes = items;
     appState.hasFilterChanges = true;
