@@ -6,7 +6,7 @@ export const appConfig = {
     "Junior Colleges": [611210],
     "Other Trade Schools": [611410, 611511, 611519, 611610],
   },
-  pageNum: 10,
+  pageNum: 25,
   collegeLayerUrl:
     "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/US_Colleges_and_Universities/FeatureServer",
   collegeLayerOutFields: [
