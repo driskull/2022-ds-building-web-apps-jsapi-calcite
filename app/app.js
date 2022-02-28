@@ -162,6 +162,20 @@ async function init() {
       );
     }
 
+    if (appState.activeProgramTypes.length > 0) {
+      let schoolWhere = "";
+      const values = appState.activeProgramTypes.flat();
+      values.forEach(
+        (value) =>
+          (schoolWhere += combineSQLStatements(
+            schoolWhere,
+            `HI_OFFER = ${value}`,
+            "OR"
+          ))
+      );
+      where += combineSQLStatements(where, schoolWhere);
+    }
+
     const schoolTypeValue = schoolTypeNode.value;
     if (schoolTypeValue && schoolTypeValue !== appConfig.defaultSchoolType) {
       const values = schoolTypeValue.split(",");
@@ -189,6 +203,10 @@ async function init() {
     housingSectionNode.open = appConfig.housing.enabled;
     housingNode.minValue = appConfig.housing.min;
     housingNode.maxValue = appConfig.housing.max;
+    appState.activeProgramTypes = [];
+    [...document.querySelectorAll(`[data-type*="type-chip"]`)].forEach((item) =>
+      item.setAttribute("color", "grey")
+    );
     appState.hasFilterChanges = false;
     queryItems();
   }
@@ -379,11 +397,10 @@ async function init() {
   });
 
   // Degree type chip select
-  // TODO - don't know what data we need to use, I just replicated with the school type data
-  for (const [key, value] of Object.entries(appConfig.schoolTypes)) {
+  for (const [key, value] of Object.entries(appConfig.programTypes)) {
     const chip = document.createElement("calcite-chip");
     chip.setAttribute("tabindex", "0");
-    chip.setAttribute("scale", "s");
+    chip.setAttribute("data-type", "type-chip");
     chip.value = value;
     chip.innerText = key;
     chip.addEventListener("click", (event) =>
@@ -402,9 +419,8 @@ async function init() {
       event.target.setAttribute("color", "grey");
     }
     appState.activeProgramTypes = items;
-    // todo with data
-    // appState.hasFilterChanges = true;
-    // queryItems();
+    appState.hasFilterChanges = true;
+    queryItems();
   }
 
   // Pagination
