@@ -3,7 +3,6 @@ import MapView from "https://js.arcgis.com/4.22/@arcgis/core/views/MapView.js";
 import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
-import FeatureFilter from "https://js.arcgis.com/4.22/@arcgis/core/layers/support/FeatureFilter.js";
 import { whenFalseOnce } from "https://js.arcgis.com/4.22/@arcgis/core/core/watchUtils.js";
 
 import { appConfig } from "./config.js";
@@ -208,9 +207,12 @@ async function init() {
       paginationNode.start = 1;
     }
 
-    collegeLayerView.filter = new FeatureFilter({
-      where: where,
-    });
+    collegeLayerView.featureEffect  = {
+      filter: {
+        where: where
+      },
+      excludedEffect: "grayscale(80%) opacity(30%)"
+    };
 
     paginationNode.hidden = appState.count <= appConfig.pageNum;
 
