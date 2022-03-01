@@ -1,6 +1,7 @@
 import WebMap from "https://js.arcgis.com/4.22/@arcgis/core/WebMap.js";
 import MapView from "https://js.arcgis.com/4.22/@arcgis/core/views/MapView.js";
 import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
+import Legend from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Legend.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 import { whenFalseOnce } from "https://js.arcgis.com/4.22/@arcgis/core/core/watchUtils.js";
@@ -331,6 +332,17 @@ async function init() {
   });
 
   view.ui.add(searchExpand, "top-left");
+
+  const legend = new Legend({
+    view,
+  });
+
+  const legendExpand = new Expand({
+    view,
+    content: legend,
+  });
+
+  view.ui.add(legendExpand, "top-left");
 
   await view.when();
 
