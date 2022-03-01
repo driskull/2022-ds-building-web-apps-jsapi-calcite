@@ -28,6 +28,7 @@ async function init() {
     const campusImageContainerNode = document.getElementById(
       "campusImageContainer"
     );
+    campusImageContainerNode.innerHTML = "";
 
     const attachments = await collegeLayer.queryAttachments({
       objectIds: [objectId],
