@@ -1,3 +1,4 @@
+import Map from "https://js.arcgis.com/4.22/@arcgis/core/Map.js";
 import WebMap from "https://js.arcgis.com/4.22/@arcgis/core/WebMap.js";
 import MapView from "https://js.arcgis.com/4.22/@arcgis/core/views/MapView.js";
 import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
@@ -67,10 +68,28 @@ async function init() {
       const block = document.createElement("calcite-block");
       block.open = true;
 
-      const image = document.createElement("img");
-      image.src = "https://via.placeholder.com/100";
-      image.style.width = "100%";
-      block.appendChild(image);
+      const container = document.createElement("div");
+      container.className = "campus-view-div";
+
+      const map = new Map({
+        basemap: "satellite",
+      });
+
+      const view = new MapView({
+        container,
+        map,
+        center: [result.geometry.longitude, result.geometry.latitude],
+        zoom: 15,
+      });
+
+      view.ui.components = [];
+
+      // todo
+      // const image = document.createElement("img");
+      // image.src = "https://via.placeholder.com/100";
+      // image.style.width = "100%";
+
+      block.appendChild(container);
 
       if (attributes["WEBSITE"]) {
         const itemWebsite = document.createElement("calcite-button");

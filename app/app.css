@@ -7,6 +7,15 @@
   padding: 0;
 }
 
+.campus-view-div {
+  background-color: var(--calcite-ui-foreground-2);
+  width: 100%;
+  height: 200px;
+  pointer-events: none;
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
 #primary-panel {
   --calcite-panel-max-width: 340px;
   --calcite-panel-min-width: 340px;
