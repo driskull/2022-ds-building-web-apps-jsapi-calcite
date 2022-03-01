@@ -28,6 +28,8 @@ async function init() {
     appState.savedExtent = view.extent.clone();
     appState.activeItem = true;
 
+    await whenFalseOnce(collegeLayerView, "updating");
+
     const { features } = await collegeLayerView.queryFeatures({
       returnGeometry: true,
       outSpatialReference: view.spatialReference,
@@ -222,18 +224,7 @@ async function init() {
 
     resultBlockNode.loading = true;
 
-    await whenFalseOnce(collegeLayerView, "updating");
-
     const where = whereClause();
-
-    if (start === 0) {
-      appState.count = await collegeLayerView.queryFeatureCount({
-        geometry: view.extent.clone(),
-        where,
-      });
-      paginationNode.total = appState.count;
-      paginationNode.start = 1;
-    }
 
     collegeLayerView.featureEffect  = {
       filter: {
@@ -242,12 +233,21 @@ async function init() {
       excludedEffect: "grayscale(80%) opacity(30%)"
     };
 
+    await whenFalseOnce(collegeLayerView, "updating");
+
+    if (start === 0) {
+      appState.count = await collegeLayerView.queryFeatureCount({
+        where,
+      });
+      paginationNode.total = appState.count;
+      paginationNode.start = 1;
+    }
+
     paginationNode.hidden = appState.count <= appConfig.pageNum;
 
     const results = await collegeLayerView.queryFeatures({
       start,
       num: appConfig.pageNum,
-      geometry: view.extent.clone(),
       where: whereClause(),
       outFields: [
         ...appConfig.collegeLayerOutFields,
