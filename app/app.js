@@ -24,6 +24,44 @@ async function init() {
   const resetNode = document.getElementById("reset");
   const flowNode = document.getElementById("flow");
 
+  async function getAttachment(objectId, result) {
+    const campusImageContainerNode = document.getElementById(
+      "campusImageContainer"
+    );
+
+    const attachments = await collegeLayer.queryAttachments({
+      objectIds: [objectId],
+      num: 1,
+    });
+
+    const attachmentGroup = attachments[objectId];
+
+    if (attachmentGroup) {
+      const attachment = attachmentGroup[0];
+      const image = document.createElement("img");
+      image.src = `${attachment.url}/${attachment.name}`;
+      campusImageContainerNode.appendChild(image);
+      return;
+    }
+
+    const container = document.createElement("div");
+    container.id = "campusViewDiv";
+    campusImageContainerNode.appendChild(container);
+
+    const map = new Map({
+      basemap: "satellite",
+    });
+
+    const view = new MapView({
+      container,
+      map,
+      center: [result.geometry.longitude, result.geometry.latitude],
+      zoom: 15,
+    });
+
+    view.ui.components = [];
+  }
+
   // display requested item data
   // handle flow destroying dom of added panel...
   async function resultClickHandler(objectId) {
@@ -45,7 +83,7 @@ async function init() {
       return;
     }
 
-    filtersNode.disabled = true;
+    filtersNode.hidden = true;
     const attributes = result.attributes;
     const detailPanelNode = document.getElementById("detail-panel");
     // a janky way to replace content in a single panel vs appending entire new one each time
@@ -62,34 +100,17 @@ async function init() {
           appState.savedExtent = null;
         }
         appState.activeItem = false;
-        filtersNode.disabled = false;
+        filtersNode.hidden = false;
       });
 
       const block = document.createElement("calcite-block");
       block.open = true;
 
-      const container = document.createElement("div");
-      container.className = "campus-view-div";
+      const campusImageNode = document.createElement("div");
+      campusImageNode.id = "campusImageContainer";
+      campusImageNode.className = "campus-image-container";
 
-      const map = new Map({
-        basemap: "satellite",
-      });
-
-      const view = new MapView({
-        container,
-        map,
-        center: [result.geometry.longitude, result.geometry.latitude],
-        zoom: 15,
-      });
-
-      view.ui.components = [];
-
-      // todo
-      // const image = document.createElement("img");
-      // image.src = "https://via.placeholder.com/100";
-      // image.style.width = "100%";
-
-      block.appendChild(container);
+      block.appendChild(campusImageNode);
 
       if (attributes["WEBSITE"]) {
         const itemWebsite = document.createElement("calcite-button");
@@ -144,6 +165,8 @@ async function init() {
       },
       { duration: 400 }
     );
+
+    getAttachment(objectId, result);
   }
 
   // uh probably do this elsewhere
@@ -257,6 +280,7 @@ async function init() {
 
     if (start === 0) {
       appState.count = await collegeLayerView.queryFeatureCount({
+        geometry: view.extent.clone(),
         where,
       });
       paginationNode.total = appState.count;
@@ -268,6 +292,7 @@ async function init() {
     const results = await collegeLayerView.queryFeatures({
       start,
       num: appConfig.pageNum,
+      geometry: view.extent.clone(),
       where: whereClause(),
       outFields: [
         ...appConfig.collegeLayerOutFields,
