@@ -368,7 +368,7 @@ async function init() {
 
     const results = response.results.filter(
       (result) =>
-        result.graphic.sourceLayer.id === collegeLayer.id &&
+        result.graphic.sourceLayer?.id === collegeLayer.id &&
         !result.graphic.isAggregate
     );
 
