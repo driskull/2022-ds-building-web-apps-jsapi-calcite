@@ -25,6 +25,7 @@ export const appConfig = {
     "NAME",
     "WEBSITE",
     "TOT_ENROLL",
+    "POPULATION",
     "DORM_CAP",
     "HI_OFFER",
   ],

@@ -155,9 +155,11 @@ async function init() {
         "detail-item-website"
       ).href = `http://${attributes["WEBSITE"]}`;
 
-      document.getElementById(
-        "detail-chip-pop"
-      ).innerText = `population: ${attributes["POPULATION"]}`;
+      if (attributes["POPULATION"]) {
+        document.getElementById(
+          "detail-chip-pop"
+        ).innerText = `population: ${attributes["POPULATION"]}`;
+      }
     }
     view.goTo(
       {
