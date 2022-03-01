@@ -227,11 +227,11 @@ async function init() {
 
     const where = whereClause();
 
-    collegeLayerView.featureEffect  = {
+    collegeLayerView.featureEffect = {
       filter: {
-        where: where
+        where: where,
       },
-      excludedEffect: "grayscale(80%) opacity(30%)"
+      excludedEffect: "grayscale(80%) opacity(30%)",
     };
 
     await whenFalseOnce(collegeLayerView, "updating");
