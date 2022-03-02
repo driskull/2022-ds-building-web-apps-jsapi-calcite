@@ -8,7 +8,9 @@
   <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.77/calcite.css" />
   <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.77/calcite.esm.js"></script>
   <!-- JSAPI -->
-  <link rel="stylesheet" href="https://js.arcgis.com/4.22/@arcgis/core/assets/esri/themes/light/main.css">
+  <link id="jsapi-theme-light" rel="stylesheet"
+    href="https://js.arcgis.com/4.22/@arcgis/core/assets/esri/themes/light/main.css">
+  <link disabled id="jsapi-theme-dark" rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/dark/main.css" />
   <!-- App-->
   <link rel="stylesheet" href="app/app.css" />
   <script type="module" src="app/app.js"></script>
@@ -17,10 +19,13 @@
 
 <body>
   <calcite-tooltip-manager>
-    <calcite-shell class="calcite-presentation" content-behind>
+    <calcite-shell class="calcite-presentation" content-behind id="shell">
       <div class="temporary-header" slot="header">
         <calcite-icon icon="education" scale="l"></calcite-icon>
         UniversityFinder
+        <calcite-action-pad layout="horizontal" expand-disabled>
+          <calcite-action id="themeToggle" text="Light" icon="brightness"></calcite-action>
+        </calcite-action-pad>
       </div>
       <!-- the width-scale="" is a hack to let us set a static width - not sure if intended ...-->
       <calcite-shell-panel slot="primary-panel" width-scale id="primary-panel">

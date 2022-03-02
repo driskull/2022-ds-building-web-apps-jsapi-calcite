@@ -23,6 +23,9 @@ async function init() {
   const filtersNode = document.getElementById("filters");
   const resetNode = document.getElementById("reset");
   const flowNode = document.getElementById("flow");
+  const themeNode = document.getElementById("themeToggle");
+  const darkThemeCss = document.getElementById("jsapi-theme-dark");
+  const lightThemeCss = document.getElementById("jsapi-theme-light");
 
   async function getAttachment(objectId, result) {
     const campusImageContainerNode = document.getElementById(
@@ -128,11 +131,9 @@ async function init() {
       }
 
       if (attributes["NAICS_DESC"]) {
-        const typeChip = document.createElement("calcite-chip");
-        typeChip.id = "detail-chip-type";
-        typeChip.innerText = `type of college: ${handleCasing(
-          attributes["NAICS_DESC"]
-        )}`;
+        const typeChip = document.createElement("calcite-label");
+        typeChip.id = "detail-item-type";
+        typeChip.innerText = `${handleCasing(attributes["NAICS_DESC"])}`;
         block.appendChild(typeChip);
       }
 
@@ -148,7 +149,7 @@ async function init() {
     } else {
       detailPanelNode.heading = handleCasing(attributes["NAME"]);
       document.getElementById(
-        "detail-chip-type"
+        "detail-item-type"
       ).innerText = `type: ${handleCasing(attributes["NAICS_DESC"])}`;
       document.getElementById("detail-item-website").innerText = `Learn more`;
       document.getElementById(
@@ -308,45 +309,63 @@ async function init() {
     resultBlockNode.summary = `${appState.count} universities found within the map.`;
 
     resultsNode.innerHTML = "";
-    results.features.map((result) => {
-      const attributes = result.attributes;
-      const itemButton = document.createElement("button");
-      itemButton.className = "item-button";
-      const item = document.createElement("calcite-card");
-      itemButton.appendChild(item);
+    if (results.features.length) {
+      results.features.map((result) => {
+        const attributes = result.attributes;
+        const itemButton = document.createElement("button");
+        itemButton.className = "item-button";
+        const item = document.createElement("calcite-card");
+        itemButton.appendChild(item);
 
-      if (parseInt(attributes["DORM_CAP"]) !== -999) {
-        const chipDorm = document.createElement("calcite-chip");
-        chipDorm.icon = "locator";
-        chipDorm.slot = "footer-trailing";
-        chipDorm.scale = "s";
-        chipDorm.innerText = "Housing";
-        item.appendChild(chipDorm);
-      }
+        if (parseInt(attributes["DORM_CAP"]) !== -999) {
+          const chipDorm = document.createElement("calcite-chip");
+          chipDorm.icon = "locator";
+          chipDorm.slot = "footer-trailing";
+          chipDorm.scale = "s";
+          chipDorm.innerText = "Housing";
+          item.appendChild(chipDorm);
+        }
 
-      const chipState = document.createElement("calcite-chip");
-      chipState.slot = "footer-leading";
-      chipState.scale = "s";
-      chipState.innerText = attributes["STATE"];
-      item.appendChild(chipState);
+        const chipState = document.createElement("calcite-chip");
+        chipState.slot = "footer-leading";
+        chipState.scale = "s";
+        chipState.innerText = attributes["STATE"];
+        item.appendChild(chipState);
+
+        const title = document.createElement("span");
+        title.slot = "title";
+        title.innerText = handleCasing(attributes["NAME"]);
+
+        const summary = document.createElement("span");
+        summary.slot = "subtitle";
+        summary.innerText = handleCasing(attributes["NAICS_DESC"]);
+
+        item.appendChild(title);
+        item.appendChild(summary);
+
+        itemButton.addEventListener("click", () =>
+          resultClickHandler(result.attributes[collegeLayer.objectIdField])
+        );
+
+        resultsNode.appendChild(itemButton);
+      });
+    } else {
+      const notice = document.createElement("calcite-notice");
+      notice.active = true;
+      notice.width = "full";
+
+      const message = document.createElement("span");
+      message.slot = "message";
+      message.innerText = "Reset filters or move the map";
 
       const title = document.createElement("span");
       title.slot = "title";
-      title.innerText = handleCasing(attributes["NAME"]);
+      title.innerText = "No results in view";
 
-      const summary = document.createElement("span");
-      summary.slot = "subtitle";
-      summary.innerText = handleCasing(attributes["NAICS_DESC"]);
-
-      item.appendChild(title);
-      item.appendChild(summary);
-
-      itemButton.addEventListener("click", () =>
-        resultClickHandler(result.attributes[collegeLayer.objectIdField])
-      );
-
-      resultsNode.appendChild(itemButton);
-    });
+      notice.appendChild(title);
+      notice.appendChild(message);
+      resultsNode.appendChild(notice);
+    }
   }
 
   const map = new WebMap({
@@ -476,6 +495,7 @@ async function init() {
     chip.tabIndex = 0;
     chip.dataset.type = "type";
     chip.value = value;
+    chip.scale = "s";
     chip.innerText = key;
     chip.addEventListener("click", (event) =>
       handleMultipleChipSelection(event, value)
@@ -495,6 +515,24 @@ async function init() {
     appState.activeProgramTypes = items;
     appState.hasFilterChanges = true;
     queryItems();
+  }
+
+  // handle theme swap
+  themeNode.addEventListener("click", () => handleThemeChange());
+
+  function handleThemeChange() {
+    appState.theme = appState.theme === "dark" ? "light" : "dark";
+    darkThemeCss.disabled = !darkThemeCss.disabled;
+    lightThemeCss.disabled = !lightThemeCss.disabled;
+    if (appState.theme === "dark") {
+      map.basemap = "dark-gray-vector";
+      document.body.className = "calcite-theme-dark";
+      themeNode.icon = "moon";
+    } else {
+      map.basemap = "gray-vector";
+      document.body.className = "";
+      themeNode.icon = "brightness";
+    }
   }
 
   // Pagination
