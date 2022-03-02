@@ -35,18 +35,25 @@
 }
 
 calcite-slider {
-  max-width: 90%;
+  max-width: 96%;
 }
 
 calcite-card {
   margin-bottom: 0.75rem;
   cursor: pointer;
+  text-align: start;
 }
 
-calcite-shell {
+body {
   --calcite-ui-brand: purple;
   --calcite-ui-brand-hover: rgb(94, 0, 94);
   --calcite-ui-brand-press: rgb(87, 0, 87);
+}
+
+body.calcite-theme-dark {
+  --calcite-ui-brand: rgb(125, 0, 209);
+  --calcite-ui-brand-hover: rgb(121, 0, 205);
+  --calcite-ui-brand-press: rgb(141, 0, 225);
 }
 
 .item-button {
@@ -59,16 +66,25 @@ calcite-shell {
 }
 
 .temporary-header {
-  padding: 1.25rem 0.75rem;
+  padding: 0.75rem;
   font-size: 20px;
   font-weight: 500;
   display: flex;
   align-items: center;
   color: purple;
+  background-color: var(--calcite-ui-background);
+  justify-content: space-between;
 }
 
+.calcite-theme-dark .temporary-header {
+  color: white;
+  --calcite-ui-icon-color: white;
+}
+
+calcite-action-pad {
+  margin-inline-start: auto;
+}
 .temporary-header calcite-icon {
-  --calcite-ui-icon-color: purple;
   margin-inline-end: 1rem;
 }
 
