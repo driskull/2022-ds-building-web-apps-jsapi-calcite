@@ -107,14 +107,21 @@ async function init() {
         filtersNode.hidden = false;
       });
 
-      const block = document.createElement("calcite-block");
-      block.open = true;
+      const blockOne = document.createElement("calcite-block");
+      blockOne.heading = "Institution overview";
+      blockOne.collapsible = true;
+      blockOne.open = true;
+
+      const blockTwo = document.createElement("calcite-block");
+      blockTwo.heading = "Enrollment details";
+      blockTwo.collapsible = true;
+      blockTwo.open = true;
 
       const campusImageNode = document.createElement("div");
       campusImageNode.id = "campusImageContainer";
       campusImageNode.className = "campus-image-container";
 
-      block.appendChild(campusImageNode);
+      blockOne.appendChild(campusImageNode);
 
       if (attributes["WEBSITE"]) {
         const itemWebsite = document.createElement("calcite-button");
@@ -130,37 +137,99 @@ async function init() {
         panel.appendChild(itemWebsite);
       }
 
+      const notice = document.createElement("calcite-notice");
+      notice.active = true;
+      notice.width = "full";
+
+      const message = document.createElement("span");
+      message.id = "overview-text";
+      message.slot = "message";
+      message.innerText = attributes["overview"]
+        ? attributes["overview"]
+        : "No overview available";
+
+      notice.appendChild(message);
+      blockOne.appendChild(notice);
+
       if (attributes["NAICS_DESC"]) {
-        const typeChip = document.createElement("calcite-label");
-        typeChip.id = "detail-item-type";
-        typeChip.innerText = `${handleCasing(attributes["NAICS_DESC"])}`;
-        block.appendChild(typeChip);
+        const chip = document.createElement("calcite-label");
+        chip.id = "detail-item-type";
+        chip.innerText = `Type: ${handleCasing(attributes["NAICS_DESC"])}`;
+        blockOne.appendChild(chip);
+      }
+
+      if (attributes["schoolType"]) {
+        const chip = document.createElement("calcite-label");
+        chip.id = "detail-item-private";
+        chip.innerText = `Public or Private: ${handleCasing(
+          attributes["schoolType"]
+        )}`;
+        blockOne.appendChild(chip);
       }
 
       if (attributes["TOT_ENROLL"]) {
-        const popChip = document.createElement("calcite-chip");
-        popChip.id = "detail-chip-pop";
-        popChip.innerText = `population: ${attributes["TOT_ENROLL"]}`;
-        block.appendChild(popChip);
+        const chip = document.createElement("calcite-chip");
+        chip.id = "detail-chip-pop-total";
+        chip.innerText = `Total: ${parseInt(
+          attributes["TOT_ENROLL"]
+        ).toLocaleString()}`;
+        blockTwo.appendChild(chip);
       }
 
-      panel.appendChild(block);
+      if (attributes["FT_ENROLL"]) {
+        const count =
+          attributes["FT_ENROLL"] === -999 ? "0" : attributes["FT_ENROLL"];
+        const chip = document.createElement("calcite-chip");
+        chip.id = "detail-chip-pop-ft";
+        chip.innerText = `Full time: ${parseInt(count).toLocaleString()}`;
+        blockTwo.appendChild(chip);
+      }
+
+      if (attributes["PT_ENROLL"]) {
+        const count =
+          attributes["PT_ENROLL"] === -999 ? "0" : attributes["PT_ENROLL"];
+        const chip = document.createElement("calcite-chip");
+        chip.id = "detail-chip-pop-pt";
+        chip.innerText = `Part time: ${parseInt(count).toLocaleString()}`;
+        blockTwo.appendChild(chip);
+      }
+
+      panel.appendChild(blockOne);
+      panel.appendChild(blockTwo);
       flowNode.appendChild(panel);
     } else {
       detailPanelNode.heading = handleCasing(attributes["NAME"]);
       document.getElementById(
         "detail-item-type"
-      ).innerText = `type: ${handleCasing(attributes["NAICS_DESC"])}`;
+      ).innerText = `Type: ${handleCasing(attributes["NAICS_DESC"])}`;
       document.getElementById("detail-item-website").innerText = `Learn more`;
       document.getElementById(
         "detail-item-website"
       ).href = `http://${attributes["WEBSITE"]}`;
 
-      if (attributes["POPULATION"]) {
-        document.getElementById(
-          "detail-chip-pop"
-        ).innerText = `population: ${attributes["POPULATION"]}`;
-      }
+      document.getElementById("overview-text").innerText = attributes[
+        "overview"
+      ]
+        ? attributes["overview"]
+        : "No overview available";
+
+      document.getElementById(
+        "detail-chip-pop-total"
+      ).innerText = `Total: ${parseInt(
+        attributes["FT_ENROLL"]
+      ).toLocaleString()}`;
+
+      const ftCount =
+        attributes["FT_ENROLL"] === -999 ? "0" : attributes["FT_ENROLL"];
+      document.getElementById(
+        "detail-chip-pop-ft"
+      ).innerText = `Full time: ${parseInt(ftCount).toLocaleString()}`;
+
+      const ptCount =
+        attributes["PT_ENROLL"] === -999 ? "0" : attributes["PT_ENROLL"];
+      document.getElementById(
+        "detail-chip-pop-pt"
+      ).innerText = `Part time: ${parseInt(ptCount).toLocaleString()}`;
     }
     view.goTo(
       {
@@ -318,18 +387,19 @@ async function init() {
         itemButton.appendChild(item);
 
         if (parseInt(attributes["DORM_CAP"]) !== -999) {
-          const chipDorm = document.createElement("calcite-chip");
-          chipDorm.icon = "locator";
-          chipDorm.slot = "footer-trailing";
-          chipDorm.scale = "s";
-          chipDorm.innerText = "Housing";
-          item.appendChild(chipDorm);
+          const chip = document.createElement("calcite-chip");
+          chip.icon = "locator";
+          chip.slot = "footer-trailing";
+          chip.scale = "s";
+          chip.innerText = "Housing";
+          item.appendChild(chip);
         }
 
         const chipState = document.createElement("calcite-chip");
         chipState.slot = "footer-leading";
         chipState.scale = "s";
-        chipState.innerText = attributes["STATE"];
+        chipState.icon = "group";
+        chipState.innerText = attributes["sizeRange"];
         item.appendChild(chipState);
 
         const title = document.createElement("span");

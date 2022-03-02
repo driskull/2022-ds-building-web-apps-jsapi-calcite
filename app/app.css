@@ -19,11 +19,13 @@
 .campus-image-container {
   width: 100%;
   margin-bottom: 0.75rem;
-  background-color: var(--calcite-ui-foreground-2);
+  background-color: var(--calcite-ui-background);
   text-align: center;
+  height: 200px;
 }
 
 .campus-image-container img {
+  height: 200px;
   max-width: 100%;
 }
 
@@ -88,6 +90,15 @@ calcite-action-pad {
   margin-inline-end: 1rem;
 }
 
+/* styling for detail chips */
+calcite-block calcite-chip {
+  margin-inline-end: 0.5rem;
+  margin-block-start: 0.5rem;
+}
+
+calcite-block calcite-notice {
+  margin-block-end: 1rem;
+}
 /* styling for chip select */
 #programType calcite-chip {
   margin-inline-end: 0.5rem;
