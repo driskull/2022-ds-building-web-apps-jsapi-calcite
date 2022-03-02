@@ -315,10 +315,10 @@ async function init() {
 
   function resetFilters() {
     schoolTypeNode.value = appConfig.defaultSchoolType;
-    appState.attendance = appConfig.attendance;
+    appState.attendance = { ...appConfig.attendance };
     attendanceNode.minValue = appConfig.attendance.min;
     attendanceNode.maxValue = appConfig.attendance.max;
-    appState.housing = appConfig.housing;
+    appState.housing = { ...appConfig.housing };
     housingSectionNode.open = appConfig.housing.enabled;
     housingNode.minValue = appConfig.housing.min;
     housingNode.maxValue = appConfig.housing.max;
