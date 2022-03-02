@@ -34,6 +34,10 @@
   --calcite-shell-panel-min-width: 340px;
 }
 
+calcite-slider {
+  max-width: 96%;
+}
+
 calcite-card {
   margin-bottom: 0.75rem;
   cursor: pointer;
