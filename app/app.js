@@ -439,6 +439,67 @@ async function init() {
     };
   }
 
+  function displayNoResult() {
+    const notice = document.createElement("calcite-notice");
+    notice.active = true;
+    notice.width = "full";
+
+    const message = document.createElement("span");
+    message.slot = "message";
+    message.innerText = "Reset filters or move the map";
+
+    const title = document.createElement("span");
+    title.slot = "title";
+    title.innerText = "No results in view";
+
+    notice.appendChild(title);
+    notice.appendChild(message);
+    resultsNode.appendChild(notice);
+  }
+
+  function displayResult(result) {
+    {
+      const attributes = result.attributes;
+      const itemButton = document.createElement("button");
+      itemButton.className = "item-button";
+      const item = document.createElement("calcite-card");
+      itemButton.appendChild(item);
+
+      if (parseInt(attributes["DORM_CAP"]) !== -999) {
+        const chip = document.createElement("calcite-chip");
+        chip.icon = "locator";
+        chip.slot = "footer-trailing";
+        chip.scale = "s";
+        chip.innerText = "Housing";
+        item.appendChild(chip);
+      }
+
+      const chipState = document.createElement("calcite-chip");
+      chipState.slot = "footer-leading";
+      chipState.scale = "s";
+      chipState.icon = "group";
+      chipState.innerText = attributes["sizeRange"];
+      item.appendChild(chipState);
+
+      const title = document.createElement("span");
+      title.slot = "title";
+      title.innerText = handleCasing(attributes["NAME"]);
+
+      const summary = document.createElement("span");
+      summary.slot = "subtitle";
+      summary.innerText = handleCasing(attributes["NAICS_DESC"]);
+
+      item.appendChild(title);
+      item.appendChild(summary);
+
+      itemButton.addEventListener("click", () =>
+        resultClickHandler(result.attributes[collegeLayer.objectIdField])
+      );
+
+      resultsNode.appendChild(itemButton);
+    }
+  }
+
   async function queryItems(start = 0) {
     resetNode.hidden = !appState.hasFilterChanges;
     resetNode.indicator = appState.hasFilterChanges;
@@ -488,62 +549,9 @@ async function init() {
 
     resultsNode.innerHTML = "";
     if (results.features.length) {
-      results.features.map((result) => {
-        const attributes = result.attributes;
-        const itemButton = document.createElement("button");
-        itemButton.className = "item-button";
-        const item = document.createElement("calcite-card");
-        itemButton.appendChild(item);
-
-        if (parseInt(attributes["DORM_CAP"]) !== -999) {
-          const chip = document.createElement("calcite-chip");
-          chip.icon = "locator";
-          chip.slot = "footer-trailing";
-          chip.scale = "s";
-          chip.innerText = "Housing";
-          item.appendChild(chip);
-        }
-
-        const chipState = document.createElement("calcite-chip");
-        chipState.slot = "footer-leading";
-        chipState.scale = "s";
-        chipState.icon = "group";
-        chipState.innerText = attributes["sizeRange"];
-        item.appendChild(chipState);
-
-        const title = document.createElement("span");
-        title.slot = "title";
-        title.innerText = handleCasing(attributes["NAME"]);
-
-        const summary = document.createElement("span");
-        summary.slot = "subtitle";
-        summary.innerText = handleCasing(attributes["NAICS_DESC"]);
-
-        item.appendChild(title);
-        item.appendChild(summary);
-
-        itemButton.addEventListener("click", () =>
-          resultClickHandler(result.attributes[collegeLayer.objectIdField])
-        );
-
-        resultsNode.appendChild(itemButton);
-      });
+      results.features.map((result) => displayResult(result));
     } else {
-      const notice = document.createElement("calcite-notice");
-      notice.active = true;
-      notice.width = "full";
-
-      const message = document.createElement("span");
-      message.slot = "message";
-      message.innerText = "Reset filters or move the map";
-
-      const title = document.createElement("span");
-      title.slot = "title";
-      title.innerText = "No results in view";
-
-      notice.appendChild(title);
-      notice.appendChild(message);
-      resultsNode.appendChild(notice);
+      displayNoResult();
     }
   }
 
