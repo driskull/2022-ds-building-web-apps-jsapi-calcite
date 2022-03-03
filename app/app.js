@@ -61,11 +61,7 @@ async function init() {
       container,
       map,
       center: [result.geometry.longitude, result.geometry.latitude],
-      zoom: 15,
-      highlightOptions: {      
-        fillOpacity: 0,
-        haloColor: "#D0D0D0"
-      }
+      zoom: 15
     });
 
     view.ui.components = [];
@@ -550,6 +546,10 @@ async function init() {
   const view = new MapView({
     container: "viewDiv",
     map,
+    highlightOptions: {      
+      fillOpacity: 0,
+      haloColor: "#D0D0D0"
+    }
   });
 
   view.ui.add(
