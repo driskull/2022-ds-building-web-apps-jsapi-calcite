@@ -424,6 +424,21 @@ async function init() {
     appState.hasFilterChanges = false;
     queryItems();
   }
+  
+  function filterMap() {
+    if (!collegeLayerView) {
+      return;
+    }    
+
+    const where = whereClause();
+
+    collegeLayerView.featureEffect = {
+      filter: {
+        where: where,
+      },
+      excludedEffect: "grayscale(80%) opacity(30%)"
+    };
+  }
 
   function queryItems(start) {
     queryItemsDebounced(start).catch(() => {});
@@ -445,7 +460,7 @@ async function init() {
       filter: {
         where: where,
       },
-      excludedEffect: "grayscale(80%) opacity(30%)",
+      excludedEffect: "grayscale(80%) opacity(30%)"
     };
 
     await whenFalseOnce(collegeLayerView, "updating");
@@ -631,9 +646,14 @@ async function init() {
     appState.attendance.min = event.target.minValue;
     appState.attendance.max = event.target.maxValue;
     appState.hasFilterChanges = true;
+    filterMap();
+  });
+  attendanceNode.addEventListener("calciteSliderChange", (event) => {
+    appState.attendance.min = event.target.minValue;
+    appState.attendance.max = event.target.maxValue;
+    appState.hasFilterChanges = true;
     queryItems();
   });
-
   // Housing
   housingSectionNode.open = appConfig.housing.enabled;
   housingSectionNode.addEventListener("calciteBlockSectionToggle", (event) => {
@@ -645,6 +665,12 @@ async function init() {
   housingNode.max = appConfig.housing.max;
   housingNode.minValue = appConfig.housing.min;
   housingNode.maxValue = appConfig.housing.max;
+  housingNode.addEventListener("calciteSliderInput", (event) => {
+    appState.housing.min = event.target.minValue;
+    appState.housing.max = event.target.maxValue;
+    appState.hasFilterChanges = true;
+    filterMap();
+  });
   housingNode.addEventListener("calciteSliderChange", (event) => {
     appState.housing.min = event.target.minValue;
     appState.housing.max = event.target.maxValue;
