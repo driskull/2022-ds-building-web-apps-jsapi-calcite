@@ -539,7 +539,7 @@ async function init() {
       notice.appendChild(message);
       resultsNode.appendChild(notice);
     }
-  });
+  }, 350);
 
   const map = new WebMap({
     portalItem: {
