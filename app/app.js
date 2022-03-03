@@ -6,6 +6,7 @@ import Legend from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Legend.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 import { whenFalseOnce } from "https://js.arcgis.com/4.22/@arcgis/core/core/watchUtils.js";
+import { debounce } from "https://js.arcgis.com/4.22/@arcgis/core/core/promiseUtils.js";
 
 import { appConfig } from "./config.js";
 import { appState } from "./state.js";
@@ -424,7 +425,11 @@ async function init() {
     queryItems();
   }
 
-  async function queryItems(start = 0) {
+  function queryItems(start) {
+    queryItemsDebounced(start).catch(() => {});
+  }
+
+  const queryItemsDebounced = debounce(async function (start = 0) {
     resetNode.hidden = !appState.hasFilterChanges;
     resetNode.indicator = appState.hasFilterChanges;
 
@@ -530,7 +535,7 @@ async function init() {
       notice.appendChild(message);
       resultsNode.appendChild(notice);
     }
-  }
+  });
 
   const map = new WebMap({
     portalItem: {
