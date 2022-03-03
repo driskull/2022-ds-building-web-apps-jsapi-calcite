@@ -62,6 +62,10 @@ async function init() {
       map,
       center: [result.geometry.longitude, result.geometry.latitude],
       zoom: 15,
+      highlightOptions: {      
+        fillOpacity: 0,
+        haloColor: "#D0D0D0"
+      }
     });
 
     view.ui.components = [];
