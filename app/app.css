@@ -58,6 +58,12 @@ body.calcite-theme-dark {
   --calcite-ui-brand-press: rgb(141, 0, 225);
 }
 
+calcite-label span {
+  font-weight: 500;
+  text-align: end;
+  max-width: 60%;
+}
+
 .item-button {
   margin: 0;
   padding: 0;
