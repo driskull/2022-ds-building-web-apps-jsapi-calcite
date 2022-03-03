@@ -559,6 +559,8 @@ async function init() {
 
   const search = new Search({
     view,
+    resultGraphicEnabled: false,
+    popupEnabled: false
   });
 
   const searchExpand = new Expand({
