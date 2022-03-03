@@ -6,7 +6,6 @@ import Legend from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Legend.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
 import Expand from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Expand.js";
 import { whenFalseOnce } from "https://js.arcgis.com/4.22/@arcgis/core/core/watchUtils.js";
-import { debounce } from "https://js.arcgis.com/4.22/@arcgis/core/core/promiseUtils.js";
 
 import { appConfig } from "./config.js";
 import { appState } from "./state.js";
@@ -61,7 +60,7 @@ async function init() {
       container,
       map,
       center: [result.geometry.longitude, result.geometry.latitude],
-      zoom: 15
+      zoom: 15,
     });
 
     view.ui.components = [];
@@ -424,11 +423,11 @@ async function init() {
     appState.hasFilterChanges = false;
     queryItems();
   }
-  
+
   function filterMap() {
     if (!collegeLayerView) {
       return;
-    }    
+    }
 
     const where = whereClause();
 
@@ -436,15 +435,11 @@ async function init() {
       filter: {
         where: where,
       },
-      excludedEffect: "grayscale(80%) opacity(30%)"
+      excludedEffect: "grayscale(80%) opacity(30%)",
     };
   }
 
-  function queryItems(start) {
-    queryItemsDebounced(start).catch(() => {});
-  }
-
-  const queryItemsDebounced = debounce(async function (start = 0) {
+  async function queryItems(start = 0) {
     resetNode.hidden = !appState.hasFilterChanges;
     resetNode.indicator = appState.hasFilterChanges;
 
@@ -460,7 +455,7 @@ async function init() {
       filter: {
         where: where,
       },
-      excludedEffect: "grayscale(80%) opacity(30%)"
+      excludedEffect: "grayscale(80%) opacity(30%)",
     };
 
     await whenFalseOnce(collegeLayerView, "updating");
@@ -550,7 +545,7 @@ async function init() {
       notice.appendChild(message);
       resultsNode.appendChild(notice);
     }
-  }, 350);
+  }
 
   const map = new WebMap({
     portalItem: {
@@ -561,10 +556,10 @@ async function init() {
   const view = new MapView({
     container: "viewDiv",
     map,
-    highlightOptions: {      
+    highlightOptions: {
       fillOpacity: 0,
-      haloColor: "#D0D0D0"
-    }
+      haloColor: "#D0D0D0",
+    },
   });
 
   view.ui.add(
@@ -579,7 +574,7 @@ async function init() {
   const search = new Search({
     view,
     resultGraphicEnabled: false,
-    popupEnabled: false
+    popupEnabled: false,
   });
 
   const searchExpand = new Expand({
