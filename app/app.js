@@ -616,7 +616,7 @@ async function init() {
   attendanceNode.max = appConfig.attendance.max;
   attendanceNode.minValue = appConfig.attendance.min;
   attendanceNode.maxValue = appConfig.attendance.max;
-  attendanceNode.addEventListener("calciteSliderChange", (event) => {
+  attendanceNode.addEventListener("calciteSliderInput", (event) => {
     appState.attendance.min = event.target.minValue;
     appState.attendance.max = event.target.maxValue;
     appState.hasFilterChanges = true;
