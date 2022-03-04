@@ -83,11 +83,16 @@ window.onload = () => {
 
   const codes = snippet.querySelectorAll("pre");
   const codePrev = document.getElementById("code-prev");
+  const snippetText = document.getElementById("snippet-text");
 
   function showSelectedCode() {
     snippet.scrollTop = 0;
     codes.forEach((code, index) => (code.hidden = index !== selectedIndex));
+    snippetText.textContent = "Code Snippet " + (selectedIndex + 1);
   }
+
+  showSelectedCode();
+
   codePrev.addEventListener("click", () => {
     selectedIndex--;
 

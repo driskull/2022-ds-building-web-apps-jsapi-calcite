@@ -33,6 +33,22 @@
   position: sticky;
   top: 0;
   z-index: 999;
+  font-weight: bold;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+}
+
+#code-page span {
+  flex: 1;
+}
+
+#code-prev {
+  justify-self: flex-start;
+}
+
+#code-next {
+  justify-self: flex-end;
 }
 
 .code-container {
