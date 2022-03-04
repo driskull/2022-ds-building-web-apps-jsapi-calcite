@@ -48,7 +48,14 @@
             <span class="icon-snippet"></span>
           </div>
           <div id="code-snippet">
-            <pre><code class="language-js">
+            <div class="code-container">
+              <div id="code-page">
+                <calcite-button id="code-prev" appearance="clear" scale="s" icon-start="arrow-bold-left">Previous
+                </calcite-button>
+                <calcite-button id="code-next" appearance="clear" scale="s" icon-end="arrow-bold-right">Next
+                </calcite-button>
+              </div>
+              <pre class="pre-lang"><code class="language-js">
 /************************************************************
 * Creates a new WebMap instance. A WebMap must reference
 * a PortalItem ID that represents a WebMap saved to
@@ -72,6 +79,14 @@ const webmap = new WebMap({
   }
 });
             </code></pre>
+              <pre hidden class="pre-lang"><code class="language-js">
+const webmap = new WebMap({
+  portalItem: {
+    id: "e691172598f04ea8881cd2a4adaa45ba"
+  }
+});
+</code></pre>
+            </div>
           </div>
         </div>
       </calcite-shell-center-row>

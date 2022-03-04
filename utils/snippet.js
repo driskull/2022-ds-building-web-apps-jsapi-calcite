@@ -78,4 +78,34 @@ window.onload = () => {
 
   // add event listener
   btn.addEventListener("click", expand);
+
+  let selectedIndex = 0;
+
+  const codes = snippet.querySelectorAll("pre");
+  const codePrev = document.getElementById("code-prev");
+
+  function showSelectedCode() {
+    snippet.scrollTop = 0;
+    codes.forEach((code, index) => (code.hidden = index !== selectedIndex));
+  }
+  codePrev.addEventListener("click", () => {
+    selectedIndex--;
+
+    if (selectedIndex < 0) {
+      selectedIndex = codes.length - 1;
+    }
+
+    showSelectedCode();
+  });
+
+  const codeNext = document.getElementById("code-next");
+  codeNext.addEventListener("click", () => {
+    selectedIndex++;
+
+    if (selectedIndex >= codes.length) {
+      selectedIndex = 0;
+    }
+
+    showSelectedCode();
+  });
 };
