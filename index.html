@@ -57,28 +57,17 @@
                 </calcite-button>
               </div>
               <pre class="pre-lang"><code class="language-js">
-/************************************************************
-* Creates a new WebMap instance. A WebMap must reference
-* a PortalItem ID that represents a WebMap saved to
-* arcgis.com or an on-premise portal.
-************************************************************/
-
-const webmap = new WebMap({
-  portalItem: {
-    id: "e691172598f04ea8881cd2a4adaa45ba"
-  }
-});
-/************************************************************
-* Creates a new WebMap instance. A WebMap must reference
-* a PortalItem ID that represents a WebMap saved to
-* arcgis.com or an on-premise portal.
-************************************************************/
-
-const webmap = new WebMap({
-  portalItem: {
-    id: "e691172598f04ea8881cd2a4adaa45ba"
-  }
-});
+&lt;calcite-shell content-behind id=&quot;shell&quot;&gt;
+  &lt;div slot=&quot;header&quot;&gt;&lt;/div&gt;
+  &lt;calcite-shell-panel slot=&quot;primary-panel&quot;
+   id=&quot;primary-panel&quot;&gt;
+  &lt;/calcite-shell-panel&gt;
+  &lt;calcite-shell-center-row height-scale=&quot;l&quot;&gt;
+    &lt;div id=&quot;viewDiv&quot;&gt;&lt;/div&gt;
+  &lt;/calcite-shell-center-row&gt;
+  &lt;calcite-shell-panel slot=&quot;contextual-panel&quot; detached&gt;
+  &lt;/calcite-shell-panel&gt;
+&lt;/calcite-shell&gt;
             </code></pre>
               <pre hidden class="pre-lang"><code class="language-js">
 const webmap = new WebMap({
