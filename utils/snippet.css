@@ -29,6 +29,7 @@
 
 #code-page {
   background: var(--calcite-ui-foreground-2);
+  color: var(--calcite-ui-text-3);
   padding: 5px;
   position: sticky;
   top: 0;
