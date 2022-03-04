@@ -14,7 +14,10 @@
   <!-- App-->
   <link rel="stylesheet" href="app/app.css" />
   <script type="module" src="app/app.js"></script>
-  <!-- todo theme-->
+  <link href="utils/snippet.css" rel="stylesheet" />
+  <link href="prism/prism.css" rel="stylesheet" />
+  <script src="prism/prism.js"></script>
+  <script src="utils/snippet.js"></script>
 </head>
 
 <body>
@@ -40,7 +43,37 @@
         </calcite-flow>
       </calcite-shell-panel>
       <calcite-shell-center-row height-scale="l">
-        <div id="viewDiv"></div>
+        <div id="viewDiv">
+          <div id="toggle-snippet" class="esri-widget esri-widget--button esri-interactive" title="Code Snippet">
+            <span class="icon-snippet"></span>
+          </div>
+          <div id="code-snippet">
+            <pre><code class="language-js">
+/************************************************************
+* Creates a new WebMap instance. A WebMap must reference
+* a PortalItem ID that represents a WebMap saved to
+* arcgis.com or an on-premise portal.
+************************************************************/
+
+const webmap = new WebMap({
+  portalItem: {
+    id: "e691172598f04ea8881cd2a4adaa45ba"
+  }
+});
+/************************************************************
+* Creates a new WebMap instance. A WebMap must reference
+* a PortalItem ID that represents a WebMap saved to
+* arcgis.com or an on-premise portal.
+************************************************************/
+
+const webmap = new WebMap({
+  portalItem: {
+    id: "e691172598f04ea8881cd2a4adaa45ba"
+  }
+});
+            </code></pre>
+          </div>
+        </div>
       </calcite-shell-center-row>
       <calcite-shell-panel slot="contextual-panel" detached>
         <calcite-panel id="filters" heading="Filters">

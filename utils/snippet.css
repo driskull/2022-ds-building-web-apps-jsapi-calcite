@@ -1,0 +1,22 @@
+:root {
+  --code-height: 80%;
+  --code-width: 70%;
+  --code-width-close: -70%;
+}
+
+#code-snippet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
+  margin: 0;
+  overflow: auto;
+  max-height: var(--code-height);
+  width: var(--code-width);
+  margin-left: var(--code-width-close);
+  font-size: 1.35em;
+}
+
+.icon-snippet:before {
+  content: "</>";
+}

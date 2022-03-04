@@ -752,6 +752,9 @@ async function init() {
   // View extent changes
   view.watch("center", () => !appState.activeItem && queryItems());
 
+  view.ui.add("toggle-snippet", "bottom-left");
+  view.ui.add("code-snippet", "manual");
+
   queryItems();
 }
 
