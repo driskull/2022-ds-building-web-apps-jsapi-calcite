@@ -194,22 +194,6 @@ async function queryItems(start = 0) {
 
   </code></pre>
               <pre hidden class="pre-lang"><code class="language-js">
-// Attendance Slider
-attendanceNode.addEventListener("calciteSliderInput", (event) => {
-  appState.attendance.min = event.target.minValue;
-  appState.attendance.max = event.target.maxValue;
-  appState.hasFilterChanges = true;
-  filterMap();
-});
-attendanceNode.addEventListener("calciteSliderChange", (event) => {
-  appState.attendance.min = event.target.minValue;
-  appState.attendance.max = event.target.maxValue;
-  appState.hasFilterChanges = true;
-  queryItems();
-});
-
-    </code></pre>
-              <pre hidden class="pre-lang"><code class="language-js">
 // Display result in list of results
 function displayResult(result) {
   const attributes = result.attributes;
@@ -253,6 +237,22 @@ function displayResult(result) {
 }
 
 </code></pre>
+              <pre hidden class="pre-lang"><code class="language-js">
+// Attendance Slider
+attendanceNode.addEventListener("calciteSliderInput", (event) => {
+  appState.attendance.min = event.target.minValue;
+  appState.attendance.max = event.target.maxValue;
+  appState.hasFilterChanges = true;
+  filterMap();
+});
+attendanceNode.addEventListener("calciteSliderChange", (event) => {
+  appState.attendance.min = event.target.minValue;
+  appState.attendance.max = event.target.maxValue;
+  appState.hasFilterChanges = true;
+  queryItems();
+});
+
+      </code></pre>
             </div>
           </div>
         </div>
