@@ -253,6 +253,28 @@ attendanceNode.addEventListener("calciteSliderChange", (event) => {
 });
 
       </code></pre>
+              <pre hidden class="pre-lang"><code class="language-css">
+body {
+  --calcite-ui-brand: purple;
+  --calcite-ui-brand-hover: rgb(94, 0, 94);
+  --calcite-ui-brand-press: rgb(87, 0, 87);
+}
+body.calcite-theme-dark {
+  --calcite-ui-brand: rgb(125, 0, 209);
+  --calcite-ui-brand-hover: rgb(121, 0, 205);
+  --calcite-ui-brand-press: rgb(141, 0, 225);
+}
+.temporary-header {
+  color: purple;
+  background-color: var(--calcite-ui-background);
+  justify-content: space-between;
+}
+.calcite-theme-dark .temporary-header {
+  color: white;
+  --calcite-ui-icon-color: white;
+}
+
+      </code></pre>
             </div>
           </div>
         </div>
