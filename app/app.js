@@ -723,9 +723,9 @@ async function init() {
   themeNode.addEventListener("click", () => handleThemeChange());
 
   function handleThemeChange() {
+    appState.activeItem = true;
     appState.theme = appState.theme === "dark" ? "light" : "dark";
     darkThemeCss.disabled = !darkThemeCss.disabled;
-    lightThemeCss.disabled = !lightThemeCss.disabled;
     if (appState.theme === "dark") {
       map.basemap = "dark-gray-vector";
       document.body.className = "calcite-theme-dark";
@@ -735,6 +735,10 @@ async function init() {
       document.body.className = "";
       themeNode.icon = "brightness";
     }
+    setTimeout(() => {
+      appState.activeItem = false;
+      lightThemeCss.disabled = !lightThemeCss.disabled;
+    }, 1000);
   }
 
   // Pagination
