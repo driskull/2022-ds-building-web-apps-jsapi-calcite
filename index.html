@@ -57,6 +57,7 @@
                 </calcite-button>
               </div>
               <pre class="pre-lang"><code class="language-html">
+&lt;!-- Application layout using Calcite --&gt;
 &lt;calcite-shell content-behind id=&quot;shell&quot;&gt;
   &lt;div slot=&quot;header&quot;&gt;&lt;/div&gt;
   &lt;calcite-shell-panel slot=&quot;primary-panel&quot;
@@ -68,13 +69,189 @@
   &lt;calcite-shell-panel slot=&quot;contextual-panel&quot; detached&gt;
   &lt;/calcite-shell-panel&gt;
 &lt;/calcite-shell&gt;
-            </code></pre>
+
+</code></pre>
+              <pre hidden class="pre-lang"><code class="language-html">
+&lt;!-- Results panel --&gt;
+&lt;calcite-shell-panel slot=&quot;primary-panel&quot; id=&quot;primary-panel&quot;&gt;
+  &lt;calcite-flow id=&quot;flow&quot;&gt;
+    &lt;calcite-panel heading=&quot;Results&quot; id=&quot;resultBlock&quot; loading&gt;
+      &lt;calcite-pagination id=&quot;pagination&quot; slot=&quot;footer&quot;&gt;
+      &lt;/calcite-pagination&gt;
+      &lt;calcite-block open&gt;
+        &lt;calcite-list id=&quot;results&quot;&gt;&lt;/calcite-list&gt;
+      &lt;/calcite-block&gt;
+    &lt;/calcite-panel&gt;
+  &lt;/calcite-flow&gt;
+&lt;/calcite-shell-panel&gt;
+
+</code></pre>
+              <pre hidden class="pre-lang"><code class="language-html">
+&lt;!-- Filters panel --&gt;
+&lt;calcite-panel id=&quot;filters&quot; heading=&quot;Filters&quot;&gt;
+  &lt;calcite-action id=&quot;reset&quot; icon=&quot;reset&quot; slot=&quot;header-actions-end&quot; hidden&gt;&lt;/calcite-action&gt;
+  &lt;calcite-block heading=&quot;Basics&quot; open&gt;
+    &lt;calcite-label&gt;
+      School type
+      &lt;calcite-select id=&quot;schoolType&quot;&gt;
+        &lt;calcite-option value=&quot;all&quot;&gt;All&lt;/calcite-option&gt;
+      &lt;/calcite-select&gt;
+    &lt;/calcite-label&gt;
+    &lt;calcite-label&gt;
+      Highest degree offered
+      &lt;div id=&quot;programType&quot;&gt;&lt;/div&gt;
+    &lt;/calcite-label&gt;
+    &lt;calcite-label&gt;
+      Enrollment range
+      &lt;calcite-slider id=&quot;attendance&quot; range label-handles min-value=&quot;0&quot; max-value=&quot;160000&quot; min=&quot;0&quot; max=&quot;160000&quot;
+        step=&quot;100&quot;&gt;
+      &lt;/calcite-slider&gt;
+    &lt;/calcite-label&gt;
+  &lt;/calcite-block&gt;
+  &lt;calcite-block heading=&quot;Housing&quot; open&gt;
+    &lt;calcite-block-section id=&quot;housingSection&quot; text=&quot;Offers on campus housing&quot; toggle-display=&quot;switch&quot;&gt;
+      &lt;calcite-label&gt;
+        Dormitory capacity
+        &lt;calcite-slider id=&quot;housing&quot; range label-handles min-value=&quot;0&quot; max-value=&quot;20000&quot; min=&quot;0&quot; max=&quot;20000&quot;
+          step=&quot;100&quot;&gt;
+        &lt;/calcite-slider&gt;
+      &lt;/calcite-label&gt;
+    &lt;/calcite-block-section&gt;
+  &lt;/calcite-block&gt;
+&lt;/calcite-panel&gt;
+
+</code></pre>
               <pre hidden class="pre-lang"><code class="language-js">
-const webmap = new WebMap({
-  portalItem: {
-    id: "e691172598f04ea8881cd2a4adaa45ba"
-  }
+// View extent changes
+view.watch("center", () => !appState.activeItem && queryItems());
+
+</code></pre>
+              <pre hidden class="pre-lang"><code class="language-js">
+// Pagination
+paginationNode.num = appConfig.pageNum;
+paginationNode.start = 1;
+paginationNode.addEventListener("calcitePaginationChange", (event) => {
+  queryItems(event.detail.start - 1);
 });
+
+</code></pre>
+              <pre hidden class="pre-lang"><code class="language-js">
+// Query for list of results to display
+async function queryItems(start = 0) {
+  resetNode.hidden = !appState.hasFilterChanges;
+  resetNode.indicator = appState.hasFilterChanges;
+
+  if (!collegeLayerView) {
+    return;
+  }
+
+  resultBlockNode.loading = true;
+
+  const where = whereClause();
+
+  collegeLayerView.featureEffect = {
+    filter: {
+      where: where,
+    },
+    excludedEffect: "grayscale(80%) opacity(30%)",
+  };
+
+  await whenFalseOnce(collegeLayerView, "updating");
+
+  if (start === 0) {
+    appState.count = await collegeLayerView.queryFeatureCount({
+      geometry: view.extent.clone(),
+      where,
+    });
+    paginationNode.total = appState.count;
+    paginationNode.start = 1;
+  }
+
+  paginationNode.hidden = appState.count <= appConfig.pageNum;
+
+  const results = await collegeLayerView.queryFeatures({
+    start,
+    num: appConfig.pageNum,
+    geometry: view.extent.clone(),
+    where: whereClause(),
+    outFields: [
+      ...appConfig.collegeLayerOutFields,
+      collegeLayer.objectIdField,
+    ],
+  });
+
+  resultBlockNode.loading = false;
+
+  resultBlockNode.summary = `${appState.count} universities found within the map.`;
+
+  resultsNode.innerHTML = "";
+  if (results.features.length) {
+    results.features.map((result) => displayResult(result));
+  } else {
+    displayNoResult();
+  }
+}
+
+  </code></pre>
+              <pre hidden class="pre-lang"><code class="language-js">
+// Attendance Slider
+attendanceNode.addEventListener("calciteSliderInput", (event) => {
+  appState.attendance.min = event.target.minValue;
+  appState.attendance.max = event.target.maxValue;
+  appState.hasFilterChanges = true;
+  filterMap();
+});
+attendanceNode.addEventListener("calciteSliderChange", (event) => {
+  appState.attendance.min = event.target.minValue;
+  appState.attendance.max = event.target.maxValue;
+  appState.hasFilterChanges = true;
+  queryItems();
+});
+
+    </code></pre>
+              <pre hidden class="pre-lang"><code class="language-js">
+// Display result in list of results
+function displayResult(result) {
+  const attributes = result.attributes;
+  const itemButton = document.createElement("button");
+  itemButton.className = "item-button";
+  const item = document.createElement("calcite-card");
+  itemButton.appendChild(item);
+
+  if (parseInt(attributes["DORM_CAP"]) !== -999) {
+    const chip = document.createElement("calcite-chip");
+    chip.icon = "locator";
+    chip.slot = "footer-trailing";
+    chip.scale = "s";
+    chip.innerText = "Housing";
+    item.appendChild(chip);
+  }
+
+  const chipState = document.createElement("calcite-chip");
+  chipState.slot = "footer-leading";
+  chipState.scale = "s";
+  chipState.icon = "group";
+  chipState.innerText = attributes["sizeRange"];
+  item.appendChild(chipState);
+
+  const title = document.createElement("span");
+  title.slot = "title";
+  title.innerText = handleCasing(attributes["NAME"]);
+
+  const summary = document.createElement("span");
+  summary.slot = "subtitle";
+  summary.innerText = handleCasing(attributes["NAICS_DESC"]);
+
+  item.appendChild(title);
+  item.appendChild(summary);
+
+  itemButton.addEventListener("click", () =>
+    resultClickHandler(result.attributes[collegeLayer.objectIdField])
+  );
+
+  resultsNode.appendChild(itemButton);
+}
+
 </code></pre>
             </div>
           </div>
@@ -83,36 +260,34 @@ const webmap = new WebMap({
       <calcite-shell-panel slot="contextual-panel" detached>
         <calcite-panel id="filters" heading="Filters">
           <calcite-action id="reset" icon="reset" slot="header-actions-end" hidden></calcite-action>
-          <div>
-            <calcite-block heading="Basics" open>
+          <calcite-block heading="Basics" open>
+            <calcite-label>
+              School type
+              <calcite-select id="schoolType">
+                <calcite-option value="all">All</calcite-option>
+              </calcite-select>
+            </calcite-label>
+            <calcite-label>
+              Highest degree offered
+              <div id="programType"></div>
+            </calcite-label>
+            <calcite-label>
+              Enrollment range
+              <calcite-slider id="attendance" range label-handles min-value="0" max-value="160000" min="0" max="160000"
+                step="100">
+              </calcite-slider>
+            </calcite-label>
+          </calcite-block>
+          <calcite-block heading="Housing" open>
+            <calcite-block-section id="housingSection" text="Offers on campus housing" toggle-display="switch">
               <calcite-label>
-                School type
-                <calcite-select id="schoolType">
-                  <calcite-option value="all">All</calcite-option>
-                </calcite-select>
-              </calcite-label>
-              <calcite-label>
-                Highest degree offered
-                <div id="programType"></div>
-              </calcite-label>
-              <calcite-label>
-                Enrollment range
-                <calcite-slider id="attendance" range label-handles min-value="0" max-value="160000" min="0"
-                  max="160000" step="100">
+                Dormitory capacity
+                <calcite-slider id="housing" range label-handles min-value="0" max-value="20000" min="0" max="20000"
+                  step="100">
                 </calcite-slider>
               </calcite-label>
-            </calcite-block>
-            <calcite-block heading="Housing" open>
-              <calcite-block-section id="housingSection" text="Offers on campus housing" toggle-display="switch">
-                <calcite-label>
-                  Dormitory capacity
-                  <calcite-slider id="housing" range label-handles min-value="0" max-value="20000" min="0" max="20000"
-                    step="100">
-                  </calcite-slider>
-                </calcite-label>
-              </calcite-block-section>
-            </calcite-block>
-          </div>
+            </calcite-block-section>
+          </calcite-block>
         </calcite-panel>
       </calcite-shell-panel>
     </calcite-shell>
