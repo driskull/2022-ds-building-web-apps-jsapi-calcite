@@ -737,7 +737,6 @@ async function init() {
     }
     setTimeout(() => {
       appState.activeItem = false;
-      lightThemeCss.disabled = !lightThemeCss.disabled;
     }, 1000);
   }
 
