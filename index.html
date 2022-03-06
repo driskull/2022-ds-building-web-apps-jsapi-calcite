@@ -30,14 +30,12 @@
           <calcite-action id="themeToggle" text="Light" icon="brightness"></calcite-action>
         </calcite-action-pad>
       </div>
-      <!-- the width-scale="" is a hack to let us set a static width - not sure if intended ...-->
       <calcite-shell-panel slot="primary-panel" width-scale id="primary-panel">
         <calcite-flow id="flow">
           <calcite-panel heading="Results" id="resultBlock" loading>
             <calcite-pagination id="pagination" slot="footer">
             </calcite-pagination>
-            <calcite-block open>
-              <calcite-list id="results"></calcite-list>
+            <calcite-block open id="results">
             </calcite-block>
           </calcite-panel>
         </calcite-flow>
@@ -78,8 +76,7 @@
     &lt;calcite-panel heading=&quot;Results&quot; id=&quot;resultBlock&quot; loading&gt;
       &lt;calcite-pagination id=&quot;pagination&quot; slot=&quot;footer&quot;&gt;
       &lt;/calcite-pagination&gt;
-      &lt;calcite-block open&gt;
-        &lt;calcite-list id=&quot;results&quot;&gt;&lt;/calcite-list&gt;
+      &lt;calcite-block open id=&quot;results&quot;&gt;
       &lt;/calcite-block&gt;
     &lt;/calcite-panel&gt;
   &lt;/calcite-flow&gt;
@@ -123,7 +120,8 @@
 </code></pre>
               <pre hidden class="pre-lang"><code class="language-js">
 // View extent changes
-view.watch("center", () => !appState.activeItem && queryItems());
+view.watch("center", () => !appState.activeItem
+&& queryItems());
 
 </code></pre>
               <pre hidden class="pre-lang"><code class="language-js">
@@ -230,7 +228,8 @@ function displayResult(result) {
   item.appendChild(summary);
 
   itemButton.addEventListener("click", () =>
-    resultClickHandler(result.attributes[collegeLayer.objectIdField])
+    resultClickHandler(
+      result.attributes[collegeLayer.objectIdField])
   );
 
   resultsNode.appendChild(itemButton);
