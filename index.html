@@ -129,13 +129,13 @@
 
 </code></pre>
               <pre hidden class="pre-lang"><code class="language-js">
-// View extent changes
+// Fetch results on view extent changes
 view.watch("center", () => !appState.activeItem
             && queryItems());
 
 </code></pre>
               <pre hidden class="pre-lang"><code class="language-js">
-// Pagination
+// Page results
 paginationNode.num = appConfig.pageNum;
 paginationNode.start = 1;
 paginationNode.addEventListener("calcitePaginationChange",
@@ -271,6 +271,7 @@ attendanceNode.addEventListener("calciteSliderChange",
 
       </code></pre>
               <pre hidden class="pre-lang"><code class="language-css">
+/* Theming snippet */
 body {
   --calcite-ui-brand: purple;
   --calcite-ui-brand-hover: rgb(94, 0, 94);
