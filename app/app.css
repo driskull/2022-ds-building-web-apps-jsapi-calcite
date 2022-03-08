@@ -79,14 +79,14 @@ calcite-label span {
   font-weight: 500;
   display: flex;
   align-items: center;
-  color: purple;
+  color: var(--calcite-ui-brand);
   background-color: var(--calcite-ui-background);
   justify-content: space-between;
 }
 
 .calcite-theme-dark .temporary-header {
-  color: white;
-  --calcite-ui-icon-color: white;
+  color: var(--calcite-ui-text-1);
+  --calcite-ui-icon-color: var(--calcite-ui-text-1);
 }
 
 calcite-action-pad {
