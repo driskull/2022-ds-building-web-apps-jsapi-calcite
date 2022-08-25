@@ -120,3 +120,18 @@ calcite-block calcite-notice {
   box-shadow: 0 0 0 2px var(--calcite-ui-foreground-1),
     0 0 0 4px var(--calcite-ui-brand);
 }
+
+.calcite-panel-contents {
+  overflow-y: auto;
+  display: block;
+  height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 0.75rem;
+  height: 8px;
+  background-color: var(--calcite-ui-border-3);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--calcite-ui-brand);
+}
