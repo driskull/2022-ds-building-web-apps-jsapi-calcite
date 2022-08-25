@@ -127,6 +127,10 @@ calcite-block calcite-notice {
   height: 100vh;
 }
 
+.calcite-block-contents {
+  width: calc(100% - 0.75rem);
+}
+
 ::-webkit-scrollbar {
   width: 0.75rem;
   height: 8px;

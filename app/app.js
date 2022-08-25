@@ -108,22 +108,30 @@ async function init() {
         filtersNode.hidden = false;
       });
 
+      // Contain the calcite-block elements for the scrollbar
+      const div = document.createElement("div");
+      div.classList.add("calcite-panel-contents");
+
       const blockOne = document.createElement("calcite-block");
+      blockOne.classList.add("calcite-block-contents");
       blockOne.heading = "Institution overview";
       blockOne.collapsible = true;
       blockOne.open = true;
 
       const blockTwo = document.createElement("calcite-block");
+      blockTwo.classList.add("calcite-block-contents");
       blockTwo.heading = "Student body";
       blockTwo.collapsible = true;
       blockTwo.open = true;
 
       const blockThree = document.createElement("calcite-block");
+      blockThree.classList.add("calcite-block-contents");
       blockThree.heading = "Housing";
       blockThree.collapsible = true;
       blockThree.open = true;
 
       const blockFour = document.createElement("calcite-block");
+      blockFour.classList.add("calcite-block-contents");
       blockFour.heading = "Contact";
       blockFour.collapsible = true;
       blockFour.open = true;
@@ -266,10 +274,12 @@ async function init() {
       labelPhone.append(spanPhone);
       blockFour.appendChild(labelPhone);
 
-      panel.appendChild(blockOne);
-      panel.appendChild(blockTwo);
-      panel.appendChild(blockThree);
-      panel.appendChild(blockFour);
+      panel.appendChild(div); // Add the div for the scrollbar
+      /* Add the blocks into the div */
+      div.appendChild(blockOne);
+      div.appendChild(blockTwo);
+      div.appendChild(blockThree);
+      div.appendChild(blockFour);
 
       flowNode.appendChild(panel);
     } else {
