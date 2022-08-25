@@ -1,6 +1,7 @@
 import Map from "https://js.arcgis.com/4.22/@arcgis/core/Map.js";
 import WebMap from "https://js.arcgis.com/4.22/@arcgis/core/WebMap.js";
 import MapView from "https://js.arcgis.com/4.22/@arcgis/core/views/MapView.js";
+import TileLayer from "https://js.arcgis.com/4.22/@arcgis/core/layers/TileLayer.js";
 import Home from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Home.js";
 import Legend from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Legend.js";
 import Search from "https://js.arcgis.com/4.22/@arcgis/core/widgets/Search.js";
@@ -53,7 +54,7 @@ async function init() {
     campusImageContainerNode.appendChild(container);
 
     const map = new Map({
-      basemap: "satellite",
+      basemap: "streets",
     });
 
     const view = new MapView({
@@ -568,6 +569,14 @@ async function init() {
     },
   });
 
+  /* Firefly tile layer for basemap use */
+  const fireflyBasemap = new TileLayer({
+    url: "https://fly.maptiles.arcgis.com/arcgis/rest/services/World_Imagery_Firefly/MapServer"
+  });
+  map.add(fireflyBasemap);
+  // Turn off visibility for light mode
+  fireflyBasemap.visible = false;
+
   view.ui.add(
     new Home({
       view,
@@ -727,10 +736,13 @@ async function init() {
     appState.theme = appState.theme === "dark" ? "light" : "dark";
     darkThemeCss.disabled = !darkThemeCss.disabled;
     if (appState.theme === "dark") {
-      map.basemap = "dark-gray-vector";
+      // Clear the basemap, and use the firefly tile layer
+      map.basemap = "none";
+      fireflyBasemap.visible = true;
       document.body.className = "calcite-theme-dark";
       themeNode.icon = "moon";
     } else {
+      fireflyBasemap.visible = false; // Change firefly visibility for light mode
       map.basemap = "gray-vector";
       document.body.className = "";
       themeNode.icon = "brightness";
