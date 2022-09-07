@@ -29,7 +29,7 @@
   max-width: 100%;
 }
 
-#primary-panel {
+#custom-panel {
   --calcite-panel-max-width: 340px;
   --calcite-panel-min-width: 340px;
   --calcite-shell-panel-max-width: 340px;
