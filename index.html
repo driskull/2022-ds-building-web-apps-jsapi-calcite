@@ -5,8 +5,8 @@
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>UniversityFinder</title>
   <!-- Calcite-->
-  <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.77/calcite.css" />
-  <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.77/calcite.esm.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.93/calcite.css" />
+  <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.93/calcite.esm.js"></script>
   <!-- JSAPI -->
   <link id="jsapi-theme-light" rel="stylesheet"
     href="https://js.arcgis.com/4.22/@arcgis/core/assets/esri/themes/light/main.css">
@@ -21,7 +21,6 @@
 </head>
 
 <body>
-  <calcite-tooltip-manager>
     <calcite-shell class="calcite-presentation" content-behind id="shell">
       <div class="temporary-header" slot="header">
         <calcite-icon icon="education" scale="l"></calcite-icon>
@@ -30,7 +29,7 @@
           <calcite-action id="themeToggle" text="Light" icon="brightness"></calcite-action>
         </calcite-action-pad>
       </div>
-      <calcite-shell-panel slot="primary-panel" width-scale id="primary-panel">
+      <calcite-shell-panel slot="panel-start" width-scale id="custom-panel">
         <calcite-flow id="flow">
           <calcite-panel heading="Results" id="resultBlock" loading>
             <calcite-pagination id="pagination" slot="footer">
@@ -60,24 +59,21 @@
 &lt;!-- Application layout using Calcite --&gt;
 &lt;calcite-shell content-behind id=&quot;shell&quot;&gt;
   &lt;div slot=&quot;header&quot;&gt;&lt;/div&gt;
-  &lt;calcite-shell-panel slot=&quot;primary-panel&quot;
-   id=&quot;primary-panel&quot;&gt;
+  &lt;calcite-shell-panel slot=&quot;panel-start&quot; id=&quot;panel-start&quot;&gt;
   &lt;/calcite-shell-panel&gt;
   &lt;calcite-shell-center-row height-scale=&quot;l&quot;&gt;
     &lt;div id=&quot;viewDiv&quot;&gt;&lt;/div&gt;
   &lt;/calcite-shell-center-row&gt;
-  &lt;calcite-shell-panel slot=&quot;contextual-panel&quot; detached&gt;
+  &lt;calcite-shell-panel slot=&quot;panel-end&quot; detached&gt;
   &lt;/calcite-shell-panel&gt;
 &lt;/calcite-shell&gt;
 
 </code></pre>
               <pre hidden class="pre-lang"><code class="language-html">
 &lt;!-- Results panel --&gt;
-&lt;calcite-shell-panel slot=&quot;primary-panel&quot;
- id=&quot;primary-panel&quot;&gt;
+&lt;calcite-shell-panel slot=&quot;panel-start&quot; id=&quot;panel-start&quot;&gt;
   &lt;calcite-flow id=&quot;flow&quot;&gt;
-    &lt;calcite-panel heading=&quot;Results&quot; id=&quot;resultBlock&quot;
-     loading&gt;
+    &lt;calcite-panel heading=&quot;Results&quot; id=&quot;resultBlock&quot; loading&gt;
       &lt;calcite-pagination id=&quot;pagination&quot; slot=&quot;footer&quot;&gt;
       &lt;/calcite-pagination&gt;
       &lt;calcite-block open id=&quot;results&quot;&gt;
@@ -90,9 +86,8 @@
               <pre hidden class="pre-lang"><code class="language-html">
 &lt;!-- Filters panel --&gt;
 &lt;calcite-panel id=&quot;filters&quot; heading=&quot;Filters&quot;&gt;
-  &lt;calcite-action id=&quot;reset&quot; icon=&quot;reset&quot;
-  slot=&quot;header-actions-end&quot;
-   hidden&gt;&lt;/calcite-action&gt;
+  &lt;calcite-action id=&quot;reset&quot; icon=&quot;reset&quot; slot=&quot;header-actions-end&quot; hidden&gt;
+  &lt;/calcite-action&gt;
   &lt;calcite-block heading=&quot;Basics&quot; open&gt;
     &lt;calcite-label&gt;
       School type
@@ -299,7 +294,7 @@ body.calcite-theme-dark {
           </div>
         </div>
       </calcite-shell-center-row>
-      <calcite-shell-panel slot="contextual-panel" detached>
+      <calcite-shell-panel slot="panel-end" detached>
         <calcite-panel id="filters" heading="Filters">
           <calcite-action id="reset" icon="reset" slot="header-actions-end" hidden></calcite-action>
           <calcite-block heading="Basics" open>
@@ -334,7 +329,6 @@ body.calcite-theme-dark {
       </calcite-shell-panel>
     </calcite-shell>
     <calcite-tooltip reference-element="reset">Reset filters</calcite-tooltip>
-  </calcite-tooltip-manager>
 </body>
 
 </html>

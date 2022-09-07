@@ -54,7 +54,7 @@ async function init() {
     campusImageContainerNode.appendChild(container);
 
     const map = new Map({
-      basemap: "streets",
+      basemap: "streets-vector",
     });
 
     const view = new MapView({
@@ -747,7 +747,7 @@ async function init() {
     darkThemeCss.disabled = !darkThemeCss.disabled;
     if (appState.theme === "dark") {
       // Clear the basemap, and use the firefly tile layer
-      map.basemap = "none";
+      map.basemap = null;
       fireflyBasemap.visible = true;
       document.body.className = "calcite-theme-dark";
       themeNode.icon = "moon";
